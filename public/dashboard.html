@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Gestión Municipal</title>
+    <!-- Lucide Icons Library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #0081C9;
+            --secondary: #8DBE23;
+            --accent: #FDB913;
+            --text-main: #1a1a1a;
+            --text-secondary: #58595B;
+            --bg-body: #F3F4F6;
+            --bg-card: #FFFFFF;
+            --border: #E5E7EB;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 8px;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .navbar-logo {
+            height: 50px;
+            background: white;
+            padding: 4px;
+            border-radius: var(--radius);
+            transition: transform 0.2s;
+        }
+
+        .navbar-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(141, 190, 35, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #7ca81f;
+            box-shadow: 0 4px 6px rgba(141, 190, 35, 0.4);
+        }
+
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #DC2626;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 30px;
+            background: #E5E7EB;
+            padding: 5px;
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        .tab {
+            padding: 10px 24px;
+            cursor: pointer;
+            border-radius: 9px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border: none;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--primary);
+        }
+
+        .tab.active {
+            background: var(--bg-card);
+            box-shadow: var(--shadow);
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #F9FAFB;
+        }
+
+        th {
+            background: #F9FAFB;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .content-section {
+            display: none;
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            margin: 5% auto;
+            padding: 30px;
+            width: 50%;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #F9FAFB;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 129, 201, 0.1);
+        }
+
+        .json-field {
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            background: #e9ecef;
+        }
+
+        .invoice-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .invoice-thumb:hover {
+            opacity: 0.8;
+        }
+    </style>
+    <!-- jsPDF and AutoTable for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="navbar-brand">
+            <img src="logo.jpg" alt="Logo Jáchal" class="navbar-logo">
+            <h2 style="margin: 0;">Gestión Administrativa</h2>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <button class="btn" onclick="logout()" style="background: rgba(255,255,255,0.2); color: white;">Cerrar
+                Sesión</button>
+            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin-top: 5px; font-weight: 500;">
+                Todos los derechos reservados | Tec. Juan Gabriel Torres
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="showSection('obras')">📂 Expedientes</div>
+            <div class="tab" onclick="showSection('inventario')">📦 Inventario PC</div>
+            <div class="tab" onclick="showSection('impresoras')">🖨️ Inventario Impresoras</div>
+            <div class="tab" onclick="showSection('redes')">📡 Redes</div>
+            <div class="tab" onclick="showSection('insumos')">🛠️ Stock Insumos</div>
+            <div class="tab" onclick="showSection('toners')">📋 Entregas Toners</div>
+            <div class="tab" onclick="showSection('toner_stock')">📦 Stock Toners</div>
+        </div>
+
+        <section id="section-obras" class="content-section active">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Expedientes</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="downloadProjectsPDF()" title="Descargar PDF">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="openModal()" title="Nuevo Expediente">
+                        <i data-lucide="plus-circle"></i> Nuevo
+                    </button>
+                </div>
+            </div>
+            <table id="projectsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Carátula</th>
+                        <th>Estado</th>
+                        <th>Presupuesto</th>
+                        <th>Número</th>
+                        <th>Facturas</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="section-inventario" class="content-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <h3>Inventario PC por Oficina</h3>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div>
+                        <label style="margin: 0; font-size: 0.9em;">Oficina:</label>
+                        <select id="officeFilter" onchange="loadInventory('PC', 'inventoryTable')"
+                            style="width: auto; min-width: 150px;">
+                            <option value="all">-- Todas --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="margin: 0; font-size: 0.9em;">Tipo:</label>
+                        <select id="typeFilter" onchange="loadInventory('PC', 'inventoryTable')"
+                            style="width: auto; min-width: 120px;">
+                            <option value="all">-- Todos --</option>
+                            <option value="Tower">Tower</option>
+                            <option value="Notebook">Notebook</option>
+                            <option value="Servidor">Servidor</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('PC')"
+                        style="margin-top: 18px;">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="addResource('PC')" style="margin-top: 18px;"
+                        title="Agregar Equipo">
+                        <i data-lucide="plus-circle"></i> Equipo
+                    </button>
+                </div>
+            </div>
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Oficina / Ubicación</th>
+                        <th>Tipo</th>
+                        <th>Descripción Detallada</th>
+                        <th>Nomenclatura</th>
+                        <th>IP</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="section-impresoras" class="content-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <h3>Inventario Impresoras por Oficina</h3>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div>
+                        <label style="margin: 0; font-size: 0.9em;">Oficina:</label>
+                        <select id="officeFilterPrinters" onchange="loadInventory('Impresora', 'printersTable')"
+                            style="width: auto; min-width: 150px;">
+                            <option value="all">-- Todas --</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Impresora')"
+                        style="margin-top: 18px;">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="addResource('Impresora')" style="margin-top: 18px;"
+                        title="Agregar Impresora">
+                        <i data-lucide="printer"></i> Impresora
+                    </button>
+                </div>
+            </div>
+            <table id="printersTable">
+                <thead>
+                    <tr>
+                        <th>Oficina / Ubicación</th>
+                        <th>Marca / Modelo</th>
+                        <th>Detalle</th>
+                        <th>IP</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="section-redes" class="content-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <h3>Inventario Redes y Conexiones</h3>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div>
+                        <label style="margin: 0; font-size: 0.9em;">Oficina:</label>
+                        <select id="officeFilterNetworks" onchange="loadInventory('Redes', 'networksTable')"
+                            style="width: auto; min-width: 150px;">
+                            <option value="all">-- Todas --</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Redes')"
+                        style="margin-top: 18px;">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="addResource('Redes')" style="margin-top: 18px;"
+                        title="Agregar Dispositivo">
+                        <i data-lucide="plus-circle"></i> Dispositivo
+                    </button>
+                </div>
+            </div>
+            <table id="networksTable">
+                <thead>
+                    <tr>
+                        <th>Oficina / Ubicación</th>
+                        <th>Descripción</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="section-insumos" class="content-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <h3>Stock de Insumos</h3>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Insumo')"
+                        style="margin-top: 18px;">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="addResource('Insumo')" style="margin-top: 18px;"
+                        title="Agregar Insumo">
+                        <i data-lucide="package"></i> Insumo
+                    </button>
+                </div>
+            </div>
+            <table id="suppliesTable">
+                <thead>
+                    <tr>
+                        <th style="min-width: 300px;">Descripción</th>
+                        <th>Cantidad</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="section-toners" class="content-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <h3>Registro de Entregas de Toners</h3>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadTonersPDF()"
+                        style="margin-top: 18px;">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="openTonerModal()" style="margin-top: 18px;"
+                        title="Registrar Entrega">
+                        <i data-lucide="plus-circle"></i> Entrega
+                    </button>
+                </div>
+            </div>
+            <table id="tonersTable">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Recibe (Nombre/DNI)</th>
+                        <th>Cargo/Área</th>
+                        <th>Impresora</th>
+                        <th>Toner (Marca/Mod)</th>
+                        <th>Entrega</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="section-toner_stock" class="content-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <h3>Inventario General de Toners (Stock)</h3>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="btn btn-primary" onclick="openTonerStockModal()" style="margin-top: 18px;"
+                        title="Cargar Stock">
+                        <i data-lucide="plus-circle"></i> Stock
+                    </button>
+                </div>
+            </div>
+            <table id="tonerStockTable">
+                <thead>
+                    <tr>
+                        <th>Modelo de Toner</th>
+                        <th>Cantidad disponible</th>
+                        <th>Descripción / Nota</th>
+                        <th>Última actualización</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </div>
+
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <h3 id="projectModalTitle">Registrar Nuevo Expediente</h3>
+            <form id="projectForm" onsubmit="event.preventDefault(); saveProject();">
+                <input type="hidden" id="projectId">
+                <div class="form-group">
+                    <label>Carátula</label>
+                    <input type="text" id="pName" required>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="pStatus">
+                        <option>Iniciado</option>
+                        <option>En Trámite</option>
+                        <option>Finalizado</option>
+                        <option>Pausado</option>
+                        <option>Archivado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Presupuesto</label>
+                    <input type="number" step="0.01" id="pBudget">
+                </div>
+
+                <hr>
+                <h4>Campos Dinámicos</h4>
+                <div class="form-group">
+                    <label>Número de Expediente</label>
+                    <input type="text" id="cExp">
+                </div>
+                <div class="form-group">
+                    <label>Responsable</label>
+                    <input type="text" id="cResp">
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Invoice Modal -->
+    <div id="invoiceModal" class="modal">
+        <div class="modal-content" style="width: 60%;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Facturas / Archivos</h3>
+                <button class="btn" onclick="closeInvoiceModal()">X</button>
+            </div>
+            <p id="invoiceCount">0 / 10 imágenes</p>
+
+            <div id="invoiceGallery"
+                style="display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; min-height: 100px; background: #f9f9f9; padding: 10px; border-radius: 4px;">
+                <!-- Initial thumbs -->
+            </div>
+
+            <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                <label>Subir Nueva Factura (Imagen)</label>
+                <input type="file" id="invoiceInput" accept="image/*" style="width: auto;">
+                <button class="btn btn-primary" onclick="uploadInvoice()">Subir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toner Modal -->
+    <div id="tonerModal" class="modal">
+        <div class="modal-content">
+            <h3>Registrar Entrega de Toner</h3>
+            <form id="tonerForm" onsubmit="event.preventDefault(); saveToner();">
+                <input type="hidden" id="tonerId">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Fecha de Entrega</label>
+                        <input type="date" id="tDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Entregado Por</label>
+                        <select id="tDeliveredBy" required>
+                            <option value="">-- Seleccionar --</option>
+                            <option>Luis Aballay</option>
+                            <option>Leonardo Salinas</option>
+                            <option>Juan G. Torres</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Nombre de quien recibe</label>
+                        <input type="text" id="tReceiverName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>DNI</label>
+                        <input type="text" id="tReceiverDni" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Cargo</label>
+                        <input type="text" id="tReceiverPosition" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Área</label>
+                        <input type="text" id="tReceiverArea" required>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label>Marca de la Impresora</label>
+                    <input type="text" id="tPrinterBrand" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Marca de Toner</label>
+                        <input type="text" id="tTonerBrand" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Modelo de Toner</label>
+                        <input type="text" id="tTonerModel" list="tonerModelsList" required>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeTonerModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toner Stock Modal -->
+    <div id="tonerStockModal" class="modal">
+        <div class="modal-content">
+            <h3 id="tonerStockModalTitle">Cargar Stock de Toner</h3>
+            <form id="tonerStockForm" onsubmit="event.preventDefault(); saveTonerStock();">
+                <input type="hidden" id="stockId">
+                <div class="form-group">
+                    <label>Modelo de Toner</label>
+                    <input type="text" id="sModel" list="tonerModelsList" required>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad Disponible</label>
+                    <input type="number" id="sQuantity" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción / Nota</label>
+                    <textarea id="sDescription" style="width: 100%; min-height: 80px;"></textarea>
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeTonerStockModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supply Modal -->
+    <div id="supplyModal" class="modal">
+        <div class="modal-content">
+            <h3 id="supplyModalTitle">Agregar Insumo</h3>
+            <form id="supplyForm" onsubmit="event.preventDefault(); saveSupply();">
+                <input type="hidden" id="supplyId">
+                <div class="form-group">
+                    <label>Descripción del Insumo</label>
+                    <input type="text" id="supName" required>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" id="supQty" required>
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeSupplyModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resource Modal (Universal for PC, Printers, Networks) -->
+    <div id="resourceModal" class="modal">
+        <div class="modal-content">
+            <h3 id="resourceModalTitle">Equipo / Dispositivo</h3>
+            <form id="resourceForm" onsubmit="event.preventDefault(); saveResource();">
+                <input type="hidden" id="rId">
+                <input type="hidden" id="rCategory">
+
+                <div class="form-group">
+                    <label>Oficina / Ubicación</label>
+                    <input type="text" id="rLocation" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group" id="groupType">
+                        <label>Tipo</label>
+                        <select id="rType">
+                            <option value="Tower">Tower</option>
+                            <option value="Notebook">Notebook</option>
+                            <option value="Servidor">Servidor</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="groupIp">
+                        <label>IP</label>
+                        <input type="text" id="rIp" placeholder="0.0.0.0">
+                    </div>
+                </div>
+
+                <div id="groupName" class="form-group">
+                    <label id="labelName">Marca / Modelo / Descripción</label>
+                    <input type="text" id="rName">
+                </div>
+
+                <div id="groupNomenclature" class="form-group">
+                    <label>Nomenclatura</label>
+                    <input type="text" id="rNomenclature">
+                </div>
+
+                <div class="form-group">
+                    <label>Detalles / Especificaciones</label>
+                    <textarea id="rSpecs" style="width: 100%; min-height: 100px;"></textarea>
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeResourceModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <datalist id="tonerModelsList"></datalist>
+
+    <script>
+        // Auth Check
+        const user = localStorage.getItem('user');
+        if (!user) window.location.href = '/';
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById('section-' + id).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (id === 'obras') loadProjects();
+            if (id === 'inventario') loadInventory('PC', 'inventoryTable');
+            if (id === 'impresoras') loadInventory('Impresora', 'printersTable');
+            if (id === 'redes') loadInventory('Redes', 'networksTable');
+            if (id === 'insumos') loadInventory('Insumo', 'suppliesTable');
+            if (id === 'toners') loadToners();
+            if (id === 'toner_stock') loadTonerStock();
+        }
+
+        // Load Projects
+        // Load Projects
+        async function loadProjects() {
+            const res = await fetch('/api/projects');
+            const projects = await res.json();
+            window.allProjects = projects; // Global for editing
+            const tbody = document.querySelector('#projectsTable tbody');
+            tbody.innerHTML = '';
+
+            projects.forEach(p => {
+                const custom = JSON.parse(p.custom_attributes || '{}');
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${p.id}</td>
+                    <td>${p.name}</td>
+                    <td><span class="badge">${p.status}</span></td>
+                    <td>$ ${p.budget || 0}</td>
+                    <td>${custom.Expediente || '-'}</td>
+                    <td>
+                        <button class="btn" onclick="openInvoiceModal(${p.id}, ${JSON.stringify(custom.invoices || []).replaceAll('"', '&quot;')})" style="padding: 4px 8px;" title="Ver Facturas">
+                            <i data-lucide="paperclip" style="width: 14px; height: 14px;"></i> ${(custom.invoices || []).length}
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="editProject(${p.id})" style="padding: 4px 8px;" title="Editar">
+                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteProject(${p.id})" style="padding: 4px 8px;" title="Eliminar">
+                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function openModal() {
+            document.getElementById('projectForm').reset();
+            document.getElementById('projectId').value = '';
+            document.getElementById('projectModalTitle').innerText = 'Registrar Nuevo Expediente';
+            document.getElementById('projectModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('projectModal').style.display = 'none';
+        }
+
+        function editProject(id) {
+            const p = window.allProjects.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('projectId').value = p.id;
+            document.getElementById('pName').value = p.name;
+            document.getElementById('pStatus').value = p.status;
+            document.getElementById('pBudget').value = p.budget || 0;
+
+            const custom = JSON.parse(p.custom_attributes || '{}');
+            document.getElementById('cExp').value = custom.Expediente || '';
+            document.getElementById('cResp').value = custom.Responsable || '';
+
+            document.getElementById('projectModalTitle').innerText = 'Editar Expediente';
+            document.getElementById('projectModal').style.display = 'block';
+        }
+
+        async function saveProject() {
+            const id = document.getElementById('projectId').value;
+            const custom = {
+                Expediente: document.getElementById('cExp').value,
+                Responsable: document.getElementById('cResp').value
+            };
+
+            const data = {
+                name: document.getElementById('pName').value,
+                status: document.getElementById('pStatus').value,
+                budget: parseFloat(document.getElementById('pBudget').value) || 0,
+                custom: custom
+            };
+
+            const url = id ? `/api/projects/${id}` : '/api/projects';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeModal();
+                loadProjects();
+            } else {
+                const err = await res.json();
+                alert('Error al guardar expediente: ' + (err.error || 'Desconocido'));
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('¿Seguro que desea eliminar este expediente?')) return;
+
+            const res = await fetch(`/api/projects/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                loadProjects();
+            } else {
+                const err = await res.json();
+                alert('Error al eliminar expediente: ' + (err.error || 'Desconocido'));
+            }
+        }
+
+        // Load Inventory
+        async function loadInventory(typeCategory = 'PC', tableId = 'inventoryTable') {
+            const res = await fetch('/api/resources');
+            let resources = await res.json();
+
+            // Sort by Location alphabetically
+            resources.sort((a, b) => a.location.localeCompare(b.location));
+
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+
+            const isPC = typeCategory === 'PC';
+            const isPrinter = typeCategory === 'Impresora';
+            const isNetwork = typeCategory === 'Redes';
+            const isSupply = typeCategory === 'Insumo';
+
+            let filterOfficeId = 'officeFilter';
+            if (isPrinter) filterOfficeId = 'officeFilterPrinters';
+            if (isNetwork) filterOfficeId = 'officeFilterNetworks';
+
+            const officeSelect = isSupply ? null : document.getElementById(filterOfficeId);
+            const currentFilter = officeSelect ? officeSelect.value : 'all';
+
+            // Distinct offices for Filter
+            const offices = resources ? [...new Set(resources.map(r => r.location))].sort() : [];
+
+            // Only update dropdown if it has 1 element (default) to avoid resetting user selection
+            if (officeSelect && (officeSelect.options.length <= 1 || officeSelect.options.length - 1 !== offices.length)) {
+                officeSelect.innerHTML = '<option value="all">-- Todas --</option>';
+                offices.forEach(off => {
+                    const opt = document.createElement('option');
+                    opt.value = off;
+                    opt.innerText = off;
+                    officeSelect.appendChild(opt);
+                });
+                officeSelect.value = currentFilter;
+            }
+
+            let currentResources = [];
+            resources.forEach(r => {
+                // Filter by Category
+                if (isPC) {
+                    if (r.type === 'Impresora' || r.type === 'Redes' || r.type === 'Insumo') return;
+                } else if (isPrinter) {
+                    if (r.type !== 'Impresora') return;
+                } else if (isNetwork) {
+                    if (r.type !== 'Redes') return;
+                } else if (isSupply) {
+                    if (r.type !== 'Insumo') return;
+                }
+
+                // Filter by UI
+                if (!isSupply && officeSelect.value !== 'all' && r.location !== officeSelect.value) return;
+                if (isPC && document.getElementById('typeFilter').value !== 'all' && r.type !== document.getElementById('typeFilter').value) return;
+
+                currentResources.push(r);
+                const specs = JSON.parse(r.specifications || '{}');
+                const tr = document.createElement('tr');
+
+                if (isPC) {
+                    tr.innerHTML = `
+                        <td>${r.location}</td>
+                        <td><span class="badge">${r.type}</span></td>
+                        <td>${specs.detalles || '-'}</td>
+                        <td>${r.nomenclature || 'N/A'}</td>
+                        <td><code>${r.ip || '-'}</code></td>
+                        <td>
+                            <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "PC")' style="padding: 4px 8px;" title="Editar">
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteResource(${r.id})" style="padding: 4px 8px;" title="Eliminar">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </td>
+                    `;
+                } else if (isPrinter) {
+                    const detalle = specs.detalle || specs.detalles || '-';
+                    tr.innerHTML = `
+                        <td>${r.location}</td>
+                        <td>${r.name}</td>
+                        <td>${detalle}</td>
+                        <td><code>${r.ip || '-'}</code></td>
+                        <td>
+                            <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "Impresora")' style="padding: 4px 8px;" title="Editar">
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteResource(${r.id})" style="padding: 4px 8px;" title="Eliminar">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </td>
+                    `;
+                } else if (isNetwork) {
+                    tr.innerHTML = `
+                         <td>${r.location}</td>
+                         <td>${r.name}</td>
+                         <td>
+                            <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "Redes")' style="padding: 4px 8px;" title="Editar">
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteResource(${r.id})" style="padding: 4px 8px;" title="Eliminar">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                         </td>
+                    `;
+                } else if (isSupply) {
+                    // Insumos
+                    tr.innerHTML = `
+                         <td style="min-width: 300px;"><span>${r.name}</span></td>
+                         <td><span>${r.stock_quantity || 0}</span></td>
+                         <td>
+                            <button class="btn btn-primary" onclick='editSupply(${JSON.stringify(r)})' style="padding: 4px 8px;" title="Editar">
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteResource(${r.id})" style="padding: 4px 8px;" title="Eliminar">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                         </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+            // Store global for easy access
+            window.lastLoadedResources = resources;
+            lucide.createIcons();
+        }
+
+        function addResource(category = 'PC') {
+            openResourceModal(category);
+        }
+
+
+
+        async function deleteResource(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) return;
+
+            const res = await fetch(`/api/resources/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                // Determine which table to reload based on the deleted item's type
+                const allResources = await (await fetch('/api/resources')).json();
+                const deletedItem = allResources.find(r => r.id === id); // This won't work as item is already deleted.
+                // A better approach is to reload both or pass category to deleteResource.
+                // For simplicity, reload both for now or rely on current active tab.
+                const activeTab = document.querySelector('.tab.active');
+                if (activeTab && activeTab.textContent.includes('PC')) {
+                    loadInventory('PC', 'inventoryTable');
+                } else if (activeTab && activeTab.textContent.includes('Impresoras')) {
+                    loadInventory('Impresora', 'printersTable');
+                } else if (activeTab && activeTab.textContent.includes('Redes')) {
+                    loadInventory('Redes', 'networksTable');
+                } else if (activeTab && activeTab.textContent.includes('Insumos')) {
+                    loadInventory('Insumo', 'suppliesTable');
+                } else {
+                    loadInventory('PC', 'inventoryTable'); // Fallback
+                    loadInventory('Impresora', 'printersTable'); // Fallback
+                    loadInventory('Redes', 'networksTable'); // Fallback
+                    loadInventory('Insumo', 'suppliesTable'); // Fallback
+                }
+            } else {
+                alert('Error al eliminar');
+            }
+        }
+
+        // Add Project
+        document.getElementById('projectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('pName').value;
+            const status = document.getElementById('pStatus').value;
+            const budget = document.getElementById('pBudget').value;
+            const custom = {};
+            if (document.getElementById('cExp').value) custom.Expediente = document.getElementById('cExp').value;
+            if (document.getElementById('cResp').value) custom.Responsable = document.getElementById('cResp').value;
+
+            const res = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, status, budget, custom })
+            });
+
+            if (res.ok) {
+                closeModal();
+                loadProjects();
+                document.getElementById('projectForm').reset();
+            }
+        });
+
+        // UI Helpers
+        function openModal() { document.getElementById('projectModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('projectModal').style.display = 'none'; }
+
+        let currentProjectId = null;
+        let currentInvoices = [];
+
+        function openInvoiceModal(id, invoices) {
+            currentProjectId = id;
+            currentInvoices = invoices || [];
+            updateGallery();
+            document.getElementById('invoiceModal').style.display = 'block';
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoiceModal').style.display = 'none';
+        }
+
+        function updateGallery() {
+            const gallery = document.getElementById('invoiceGallery');
+            document.getElementById('invoiceCount').innerText = `${currentInvoices.length} / 10 imágenes`;
+            gallery.innerHTML = currentInvoices.map(url =>
+                `<a href="${url}" target="_blank"><img src="${url}" class="invoice-thumb" title="Ver imagen completa"></a>`
+            ).join('');
+        }
+
+        async function uploadInvoice() {
+            const input = document.getElementById('invoiceInput');
+            if (input.files.length === 0) return alert('Seleccione una imagen');
+            if (currentInvoices.length >= 10) return alert('Límite de 10 facturas alcanzado');
+
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function (e) {
+                const base64 = e.target.result;
+
+                try {
+                    const res = await fetch(`/api/projects/${currentProjectId}/invoices`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64, name: file.name })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        currentInvoices.push(data.url);
+                        updateGallery();
+                        loadProjects(); // Refresh table count
+                        input.value = ''; // Reset input
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } catch (err) {
+                    alert('Error de red al subir');
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // --- PDF Export Functions ---
+
+        async function downloadProjectsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Fetch latest data
+            const res = await fetch('/api/projects');
+            const projects = await res.json();
+
+            doc.text("Listado de Expedientes", 14, 16);
+
+            const tableData = projects.map(p => {
+                const custom = JSON.parse(p.custom_attributes || '{}');
+                return [
+                    p.id,
+                    p.name,
+                    p.status,
+                    `$${p.budget || 0}`,
+                    custom.Expediente || '-'
+                ];
+            });
+
+            doc.autoTable({
+                head: [['ID', 'Carátula', 'Estado', 'Presupuesto', 'Número']],
+                body: tableData,
+                startY: 20,
+            });
+
+            doc.save('expedientes.pdf');
+        }
+
+        async function downloadInventoryPDF(category = 'PC') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const res = await fetch('/api/resources');
+            let resources = await res.json();
+
+            const isPC = category === 'PC';
+            const isPrinter = category === 'Impresora';
+            const isNetwork = category === 'Redes';
+            const isSupply = category === 'Insumo';
+
+            let title = "";
+            let filterId = 'officeFilter';
+
+            if (isPC) { title = "Inventario PC"; filterId = 'officeFilter'; }
+            if (isPrinter) { title = "Inventario Impresoras"; filterId = 'officeFilterPrinters'; }
+            if (isNetwork) { title = "Inventario Redes"; filterId = 'officeFilterNetworks'; }
+            if (isSupply) { title = "Stock Insumos"; filterId = null; }
+
+            const offFilter = filterId ? document.getElementById(filterId).value : 'all';
+
+            // Filter Category
+            if (isPC) resources = resources.filter(r => r.type !== 'Impresora' && r.type !== 'Redes' && r.type !== 'Insumo');
+            else if (isPrinter) resources = resources.filter(r => r.type === 'Impresora');
+            else if (isNetwork) resources = resources.filter(r => r.type === 'Redes');
+            else if (isSupply) resources = resources.filter(r => r.type === 'Insumo');
+
+            if (offFilter !== 'all') {
+                resources = resources.filter(r => r.location === offFilter);
+                title += ` (${offFilter})`;
+            }
+
+            if (isPC) {
+                const typFilter = document.getElementById('typeFilter').value;
+                if (typFilter !== 'all') resources = resources.filter(r => r.type === typFilter);
+            }
+
+            doc.text(title, 14, 16);
+
+            let head, body;
+
+            if (isPC) {
+                head = [['Oficina', 'Tipo', 'Descripción', 'Nomenclatura', 'IP']];
+                body = resources.map(r => {
+                    const specs = JSON.parse(r.specifications || '{}');
+                    return [r.location, r.type, specs.detalles || '', r.nomenclature || '', r.ip || ''];
+                });
+            } else if (isPrinter) {
+                head = [['Sector', 'Marca/Modelo', 'Detalle', 'IP']];
+                body = resources.map(r => {
+                    const specs = JSON.parse(r.specifications || '{}');
+                    return [r.location, r.name, specs.detalle || specs.detalles || '', r.ip || ''];
+                });
+            } else if (isNetwork) {
+                head = [['Oficina', 'Descripción']];
+                body = resources.map(r => {
+                    return [r.location, r.name];
+                });
+            } else if (isSupply) {
+                // Insumos
+                head = [['Descripción', 'Cantidad']];
+                body = resources.map(r => {
+                    return [r.name, r.stock_quantity || 0];
+                });
+            }
+
+            doc.autoTable({ head, body, startY: 20 });
+            doc.save(`${title.toLowerCase().replace(/ /g, '_')}.pdf`);
+        }
+
+        // Init
+        loadProjects();
+        loadInventory('PC', 'inventoryTable');
+        loadInventory('Impresora', 'printersTable');
+        loadInventory('Redes', 'networksTable');
+        loadInventory('Insumo', 'suppliesTable');
+        loadToners();
+        loadTonerStock();
+
+        // === TONERS LOGIC ===
+
+        async function loadToners() {
+            const res = await fetch('/api/toners');
+            const toners = await res.json();
+            const tbody = document.querySelector('#tonersTable tbody');
+            tbody.innerHTML = '';
+
+            toners.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${t.delivery_date}</td>
+                    <td><b>${t.receiver_name}</b><br><small>DNI: ${t.receiver_dni}</small></td>
+                    <td>${t.receiver_position}<br><small>${t.receiver_area}</small></td>
+                    <td>${t.printer_brand}</td>
+                    <td>${t.toner_brand}<br><small>${t.toner_model}</small></td>
+                    <td>${t.delivered_by}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick='editToner(${JSON.stringify(t)})' style="padding: 4px 8px; font-size: 0.8rem;">Editar</button>
+                        <button class="btn btn-danger" onclick="deleteToner(${t.id})" style="padding: 4px 8px; font-size: 0.8rem;">X</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Update datalist for delivery modal
+            updateTonerModelsDatalist();
+        }
+
+        async function updateTonerModelsDatalist() {
+            const res = await fetch('/api/toner-stock');
+            const stocks = await res.json();
+            const datalist = document.getElementById('tonerModelsList');
+            datalist.innerHTML = stocks.map(s => `<option value="${s.model}">`).join('');
+        }
+
+        function openTonerModal() {
+            document.getElementById('tonerForm').reset();
+            document.getElementById('tonerId').value = '';
+            document.getElementById('tDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('tonerModal').style.display = 'block';
+        }
+
+        function closeTonerModal() {
+            document.getElementById('tonerModal').style.display = 'none';
+        }
+
+        function editToner(t) {
+            document.getElementById('tonerId').value = t.id;
+            document.getElementById('tDate').value = t.delivery_date;
+            document.getElementById('tReceiverName').value = t.receiver_name;
+            document.getElementById('tReceiverDni').value = t.receiver_dni;
+            document.getElementById('tReceiverPosition').value = t.receiver_position;
+            document.getElementById('tReceiverArea').value = t.receiver_area;
+            document.getElementById('tPrinterBrand').value = t.printer_brand;
+            document.getElementById('tTonerBrand').value = t.toner_brand;
+            document.getElementById('tTonerModel').value = t.toner_model;
+            document.getElementById('tDeliveredBy').value = t.delivered_by;
+            document.getElementById('tonerModal').style.display = 'block';
+        }
+
+        async function saveToner() {
+            const id = document.getElementById('tonerId').value;
+            const data = {
+                delivery_date: document.getElementById('tDate').value,
+                receiver_name: document.getElementById('tReceiverName').value,
+                receiver_dni: document.getElementById('tReceiverDni').value,
+                receiver_position: document.getElementById('tReceiverPosition').value,
+                receiver_area: document.getElementById('tReceiverArea').value,
+                printer_brand: document.getElementById('tPrinterBrand').value,
+                toner_brand: document.getElementById('tTonerBrand').value,
+                toner_model: document.getElementById('tTonerModel').value,
+                delivered_by: document.getElementById('tDeliveredBy').value
+            };
+
+            const url = id ? `/api/toners/${id}` : '/api/toners';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeTonerModal();
+                loadToners();
+            } else {
+                alert('Error al guardar el registro');
+            }
+        }
+
+        async function deleteToner(id) {
+            if (!confirm('¿Seguro que desea eliminar este registro?')) return;
+            const res = await fetch(`/api/toners/${id}`, { method: 'DELETE' });
+            if (res.ok) loadToners();
+        }
+
+        function downloadTonersPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+
+            doc.setFontSize(18);
+            doc.text("Registro de Entrega de Toners", 14, 20);
+            doc.setFontSize(10);
+            doc.text(`Fecha de reporte: ${new Date().toLocaleString()}`, 14, 28);
+
+            doc.autoTable({
+                html: '#tonersTable',
+                startY: 35,
+                columns: [0, 1, 2, 3, 4, 5],
+                headStyles: { fillColor: [0, 129, 201] },
+                alternateRowStyles: { fillColor: [240, 240, 240] },
+                styles: { fontSize: 8, cellPadding: 2 }
+            });
+
+            doc.save(`Entrega_Toners_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        // === TONER STOCK LOGIC ===
+        let tonerStocks = [];
+
+        async function loadTonerStock() {
+            try {
+                const res = await fetch('/api/toner-stock');
+                const stocks = await res.json();
+                tonerStocks = stocks;
+
+                // Keep datalist in sync
+                const datalist = document.getElementById('tonerModelsList');
+                if (datalist) datalist.innerHTML = stocks.map(s => `<option value="${s.model}">`).join('');
+
+                const tbody = document.querySelector('#tonerStockTable tbody');
+                tbody.innerHTML = '';
+
+                stocks.forEach(s => {
+                    const tr = document.createElement('tr');
+                    const quantityClass = s.quantity <= 2 ? 'style="color: red; font-weight: bold;"' : '';
+                    tr.innerHTML = `
+                        <td>${s.model}</td>
+                        <td ${quantityClass}>${s.quantity}</td>
+                        <td>${s.description || '-'}</td>
+                        <td><small>${new Date(s.last_updated).toLocaleString()}</small></td>
+                        <td>
+                            <button class="btn btn-primary" onclick="prepareEditTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">Editar</button>
+                            <button class="btn btn-danger" onclick="deleteTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">X</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error loading toner stock:", error);
+            }
+        }
+
+        function prepareEditTonerStock(id) {
+            const s = tonerStocks.find(item => item.id === id);
+            if (s) editTonerStock(s);
+        }
+
+        function openTonerStockModal() {
+            document.getElementById('tonerStockForm').reset();
+            document.getElementById('stockId').value = '';
+            document.getElementById('tonerStockModalTitle').innerText = 'Cargar Stock de Toner';
+            document.getElementById('tonerStockModal').style.display = 'block';
+        }
+
+        function closeTonerStockModal() {
+            document.getElementById('tonerStockModal').style.display = 'none';
+        }
+
+        function editTonerStock(s) {
+            document.getElementById('stockId').value = s.id;
+            document.getElementById('sModel').value = s.model;
+            document.getElementById('sQuantity').value = s.quantity;
+            document.getElementById('sDescription').value = s.description || '';
+            document.getElementById('tonerStockModalTitle').innerText = 'Editar Stock de Toner';
+            document.getElementById('tonerStockModal').style.display = 'block';
+        }
+
+        async function saveTonerStock() {
+            const id = document.getElementById('stockId').value;
+            const data = {
+                model: document.getElementById('sModel').value,
+                quantity: parseInt(document.getElementById('sQuantity').value) || 0,
+                description: document.getElementById('sDescription').value
+            };
+
+            const url = id ? `/api/toner-stock/${id}` : '/api/toner-stock';
+            const method = id ? 'PUT' : 'POST';
+
+            // For POST, the backend expects addition if model exists, but here we want to set it if editing from stock list? 
+            // Actually the prompt said "Editar" next to "Cargar". "Cargar" usually means "add some more".
+            // I'll make POST behavior consistent: if id is null and model exists, it ADDS. If id is present, it SETS.
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeTonerStockModal();
+                loadTonerStock();
+            } else {
+                let errorMsg = 'Desconocido';
+                try {
+                    const errorData = await res.json();
+                    errorMsg = errorData.error || errorMsg;
+                } catch (e) {
+                    console.error("Error parsing error response:", e);
+                }
+                alert('Error al guardar stock: ' + errorMsg);
+            }
+        }
+
+        function addTonerStock() {
+            openTonerStockModal();
+        }
+
+        async function deleteTonerStock(id) {
+            if (!confirm('¿Seguro que desea eliminar este modelo del inventario?')) return;
+            const res = await fetch(`/api/toner-stock/${id}`, { method: 'DELETE' });
+            if (res.ok) loadTonerStock();
+        }
+        // === SUPPLY LOGIC ===
+        function openSupplyModal() {
+            document.getElementById('supplyForm').reset();
+            document.getElementById('supplyId').value = '';
+            document.getElementById('supplyModalTitle').innerText = 'Agregar Insumo';
+            document.getElementById('supplyModal').style.display = 'block';
+        }
+
+        function closeSupplyModal() {
+            document.getElementById('supplyModal').style.display = 'none';
+        }
+
+        function editSupply(r) {
+            document.getElementById('supplyId').value = r.id;
+            document.getElementById('supName').value = r.name;
+            document.getElementById('supQty').value = r.stock_quantity || 0;
+            document.getElementById('supplyModalTitle').innerText = 'Editar Insumo';
+            document.getElementById('supplyModal').style.display = 'block';
+        }
+
+        async function saveSupply() {
+            const id = document.getElementById('supplyId').value;
+            const data = {
+                name: document.getElementById('supName').value,
+                stock_quantity: parseInt(document.getElementById('supQty').value) || 0,
+                type: 'Insumo',
+                location: 'Stock' // Default location for supplies
+            };
+
+            const url = id ? `/api/resources/${id}` : '/api/resources';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeSupplyModal();
+                loadInventory('Insumo', 'suppliesTable');
+            } else {
+                const err = await res.json();
+                alert('Error al guardar insumo: ' + (err.error || 'Desconocido'));
+            }
+        }
+
+        // === UNIVERSAL RESOURCE MODAL LOGIC ===
+        function openResourceModal(category, editMode = false) {
+            document.getElementById('resourceForm').reset();
+            document.getElementById('rId').value = '';
+            document.getElementById('rCategory').value = category;
+
+            // Adjust form visibility
+            const isPC = category === 'PC';
+            const isPrinter = category === 'Impresora';
+            const isNetwork = category === 'Redes';
+
+            document.getElementById('groupType').style.display = isPC ? 'block' : 'none';
+            document.getElementById('groupIp').style.display = (isPC || isPrinter) ? 'block' : 'none';
+            document.getElementById('groupName').style.display = (isPrinter || isNetwork) ? 'block' : 'none';
+            document.getElementById('groupNomenclature').style.display = isPC ? 'block' : 'none';
+
+            document.getElementById('labelName').innerText = isPrinter ? 'Marca / Modelo' : 'Descripción';
+
+            document.getElementById('resourceModalTitle').innerText = (editMode ? 'Editar ' : 'Agregar ') + (isPC ? 'Equipo' : (isPrinter ? 'Impresora' : 'Dispositivo'));
+            document.getElementById('resourceModal').style.display = 'block';
+        }
+
+        function closeResourceModal() {
+            document.getElementById('resourceModal').style.display = 'none';
+        }
+
+        function prepareEditResource(id, category) {
+            const r = window.lastLoadedResources.find(item => item.id === id);
+            if (!r) return;
+
+            openResourceModal(category, true);
+
+            document.getElementById('rId').value = r.id;
+            document.getElementById('rLocation').value = r.location;
+            document.getElementById('rType').value = r.type;
+            document.getElementById('rIp').value = r.ip || '';
+            document.getElementById('rName').value = r.name || '';
+            document.getElementById('rNomenclature').value = r.nomenclature || '';
+
+            const specs = JSON.parse(r.specifications || '{}');
+            document.getElementById('rSpecs').value = specs.detalles || specs.detalle || '';
+        }
+
+        async function saveResource() {
+            const id = document.getElementById('rId').value;
+            const category = document.getElementById('rCategory').value;
+
+            const specs = {};
+            if (category === 'PC') specs.detalles = document.getElementById('rSpecs').value;
+            else specs.detalle = document.getElementById('rSpecs').value;
+
+            const data = {
+                location: document.getElementById('rLocation').value,
+                type: category === 'PC' ? document.getElementById('rType').value : (category === 'Impresora' ? 'Impresora' : 'Redes'),
+                name: document.getElementById('rName').value,
+                nomenclature: document.getElementById('rNomenclature').value,
+                ip: document.getElementById('rIp').value,
+                specifications: specs
+            };
+
+            const url = id ? `/api/resources/${id}` : '/api/resources';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeResourceModal();
+                loadInventory(category, category === 'PC' ? 'inventoryTable' : (category === 'Impresora' ? 'printersTable' : 'networksTable'));
+            } else {
+                const err = await res.json();
+                alert('Error al guardar: ' + (err.error || 'Desconocido'));
+            }
+        }
+        // Initial Icons
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
