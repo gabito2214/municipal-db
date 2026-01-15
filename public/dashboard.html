@@ -343,6 +343,55 @@
             h3 {
                 font-size: 1.2rem;
             }
+
+            .actions-toolbar {
+                flex-direction: column;
+                width: 100%;
+                gap: 12px !important;
+            }
+
+            .actions-toolbar>div,
+            .actions-toolbar .btn {
+                width: 100% !important;
+                margin-top: 0 !important;
+            }
+
+            .actions-toolbar select {
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 15px;
+            }
+        }
+
+        /* Generic Toolbar Classes */
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .actions-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-group label {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
     </style>
     <!-- jsPDF and AutoTable for PDF Generation -->
@@ -377,9 +426,9 @@
         </div>
 
         <section id="section-obras" class="content-section active">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="content-header">
                 <h3>Expedientes</h3>
-                <div style="display: flex; gap: 10px;">
+                <div class="actions-toolbar">
                     <button class="btn btn-secondary" onclick="downloadProjectsPDF()" title="Descargar PDF">
                         <i data-lucide="file-text"></i> PDF
                     </button>
@@ -405,18 +454,18 @@
         </section>
 
         <section id="section-inventario" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div class="content-header">
                 <h3>Inventario PC por Oficina</h3>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div>
-                        <label style="margin: 0; font-size: 0.9em;">Oficina:</label>
+                <div class="actions-toolbar">
+                    <div class="filter-group">
+                        <label>Oficina:</label>
                         <select id="officeFilter" onchange="loadInventory('PC', 'inventoryTable')"
                             style="width: auto; min-width: 150px;">
                             <option value="all">-- Todas --</option>
                         </select>
                     </div>
-                    <div>
-                        <label style="margin: 0; font-size: 0.9em;">Tipo:</label>
+                    <div class="filter-group">
+                        <label>Tipo:</label>
                         <select id="typeFilter" onchange="loadInventory('PC', 'inventoryTable')"
                             style="width: auto; min-width: 120px;">
                             <option value="all">-- Todos --</option>
@@ -451,11 +500,11 @@
         </section>
 
         <section id="section-impresoras" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div class="content-header">
                 <h3>Inventario Impresoras por Oficina</h3>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div>
-                        <label style="margin: 0; font-size: 0.9em;">Oficina:</label>
+                <div class="actions-toolbar">
+                    <div class="filter-group">
+                        <label>Oficina:</label>
                         <select id="officeFilterPrinters" onchange="loadInventory('Impresora', 'printersTable')"
                             style="width: auto; min-width: 150px;">
                             <option value="all">-- Todas --</option>
@@ -486,11 +535,11 @@
         </section>
 
         <section id="section-redes" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div class="content-header">
                 <h3>Inventario Redes y Conexiones</h3>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div>
-                        <label style="margin: 0; font-size: 0.9em;">Oficina:</label>
+                <div class="actions-toolbar">
+                    <div class="filter-group">
+                        <label>Oficina:</label>
                         <select id="officeFilterNetworks" onchange="loadInventory('Redes', 'networksTable')"
                             style="width: auto; min-width: 150px;">
                             <option value="all">-- Todas --</option>
@@ -519,15 +568,13 @@
         </section>
 
         <section id="section-insumos" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div class="content-header">
                 <h3>Stock de Insumos</h3>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Insumo')"
-                        style="margin-top: 18px;">
+                <div class="actions-toolbar">
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Insumo')">
                         <i data-lucide="file-text"></i> PDF
                     </button>
-                    <button class="btn btn-primary" onclick="addResource('Insumo')" style="margin-top: 18px;"
-                        title="Agregar Insumo">
+                    <button class="btn btn-primary" onclick="addResource('Insumo')" title="Agregar Insumo">
                         <i data-lucide="package"></i> Insumo
                     </button>
                 </div>
@@ -545,15 +592,13 @@
         </section>
 
         <section id="section-toners" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div class="content-header">
                 <h3>Registro de Entregas de Toners</h3>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadTonersPDF()"
-                        style="margin-top: 18px;">
+                <div class="actions-toolbar">
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadTonersPDF()">
                         <i data-lucide="file-text"></i> PDF
                     </button>
-                    <button class="btn btn-primary" onclick="openTonerModal()" style="margin-top: 18px;"
-                        title="Registrar Entrega">
+                    <button class="btn btn-primary" onclick="openTonerModal()" title="Registrar Entrega">
                         <i data-lucide="plus-circle"></i> Entrega
                     </button>
                 </div>
@@ -575,11 +620,10 @@
         </section>
 
         <section id="section-toner_stock" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div class="content-header">
                 <h3>Inventario General de Toners (Stock)</h3>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <button class="btn btn-primary" onclick="openTonerStockModal()" style="margin-top: 18px;"
-                        title="Cargar Stock">
+                <div class="actions-toolbar">
+                    <button class="btn btn-primary" onclick="openTonerStockModal()" title="Cargar Stock">
                         <i data-lucide="plus-circle"></i> Stock
                     </button>
                 </div>
