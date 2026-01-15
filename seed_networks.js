@@ -1,8 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
-const dbPath = path.resolve(__dirname, 'municipal.db');
-const db = new sqlite3.Database(dbPath);
+const db = require('./database');
 
 const rawData = [
     { oficina: "Despacho", desc: "switch TP-link 8 puertos" },
@@ -63,39 +59,32 @@ const rawData = [
 db.serialize(() => {
     console.log("Cargando inventario de Redes...");
 
-    db.run("DELETE FROM resources WHERE type = 'Redes'");
+    db.run("DELETE FROM resources WHERE type = 'Redes'", [], () => {
+        rawData.forEach(row => {
+            if (!row.desc) return;
 
-    const stmt = db.prepare("INSERT INTO resources (location, name, type, stock_quantity, nomenclature, ip, specifications) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            const items = row.desc.split(',').map(s => s.trim()).filter(s => s);
 
-    rawData.forEach(row => {
-        if (!row.desc) return;
+            items.forEach(item => {
+                let quantity = 1;
+                let description = item;
 
-        // Split by commas
-        const items = row.desc.split(',').map(s => s.trim()).filter(s => s);
+                const match = item.match(/^(\d+)\s+(.+)$/);
+                if (match) {
+                    quantity = parseInt(match[1]);
+                    description = match[2];
+                }
 
-        items.forEach(item => {
-            // Handle quantities like "2 switch", "3 chancletas"
-            let quantity = 1;
-            let description = item;
-
-            const match = item.match(/^(\d+)\s+(.+)$/);
-            if (match) {
-                quantity = parseInt(match[1]);
-                description = match[2];
-            }
-
-            for (let i = 0; i < quantity; i++) {
-                const specs = JSON.stringify({ detalles: description });
-                // Use description as Name for networks often makes sense, or "Dispositivo de Red"
-                // Let's use the description as the Name so it's visible in the main column
-                const name = description;
-                stmt.run(row.oficina, name, 'Redes', 1, '', '', specs);
-            }
+                for (let i = 0; i < quantity; i++) {
+                    const specs = JSON.stringify({ detalles: description });
+                    const name = description;
+                    db.run("INSERT INTO resources (location, name, type, stock_quantity, nomenclature, ip, specifications) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        [row.oficina, name, 'Redes', 1, '', '', specs], (err) => {
+                            if (err) console.error(`Error agregando red en ${row.oficina}:`, err.message);
+                        });
+                }
+            });
         });
+        console.log("Inventario de redes cargado.");
     });
-
-    stmt.finalize();
-    console.log("Inventario de redes cargado.");
 });
-
-db.close();

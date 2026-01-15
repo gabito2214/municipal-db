@@ -1,8 +1,5 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
-const dbPath = path.resolve(__dirname, 'municipal.db');
-const db = new sqlite3.Database(dbPath);
+const db = require('./database');
+const isProduction = process.env.DATABASE_URL !== undefined;
 
 const inventoryData = [
     { oficina: "Secretaría Privada de Intendencia", descripcion: "Mouse, teclado, Monitor", tipo: "Tower", cantidad: 1 },
@@ -69,26 +66,18 @@ const inventoryData = [
 db.serialize(() => {
     console.log("Reiniciando inventario de informática...");
 
-    // First clear the old resources (optional, but requested each PC one by one)
-    db.run("DELETE FROM resources WHERE type IN ('Tower', 'Notebook', 'Servidor', 'Tower (una pantalla)')");
+    db.run("DELETE FROM resources WHERE type IN ('Tower', 'Notebook', 'Servidor', 'Tower (una pantalla)')", [], () => {
+        inventoryData.forEach(item => {
+            for (let i = 0; i < item.cantidad; i++) {
+                const pcName = `Equipo ${item.tipo} #${i + 1}`;
+                const specs = JSON.stringify({ detalles: item.descripcion });
 
-    const stmt = db.prepare("INSERT INTO resources (location, name, type, stock_quantity, nomenclature, ip, specifications) VALUES (?, ?, ?, ?, ?, ?, ?)");
-
-    inventoryData.forEach(item => {
-        // Here we expand: add each PC one by one
-        for (let i = 0; i < item.cantidad; i++) {
-            const pcName = `Equipo ${item.tipo} #${i + 1}`;
-            const nomenclature = ""; // Placeholder for user input
-            const ip = ""; // Placeholder for user input
-            const specs = JSON.stringify({ detalles: item.descripcion });
-
-            stmt.run(item.oficina, pcName, item.tipo, 1, nomenclature, ip, specs);
-            console.log(`Agregada: ${item.oficina} - ${pcName}`);
-        }
+                db.run("INSERT INTO resources (location, name, type, stock_quantity, nomenclature, ip, specifications) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    [item.oficina, pcName, item.tipo, 1, "", "", specs], (err) => {
+                        if (err) console.error(`Error agregando ${pcName}:`, err.message);
+                    });
+            }
+        });
+        console.log("Inventario cargado exitosamente.");
     });
-
-    stmt.finalize();
-    console.log("Inventario cargado exitosamente.");
 });
-
-db.close();

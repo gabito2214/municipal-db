@@ -1,8 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
-const dbPath = path.resolve(__dirname, 'municipal.db');
-const db = new sqlite3.Database(dbPath);
+const db = require('./database');
 
 const supplies = [
     { cant: 3, desc: "Gabinetes" },
@@ -41,25 +37,16 @@ const supplies = [
 db.serialize(() => {
     console.log("Cargando Stock de Insumos...");
 
-    // Clean existing supplies
-    db.run("DELETE FROM resources WHERE type = 'Insumo'");
+    db.run("DELETE FROM resources WHERE type = 'Insumo'", [], () => {
+        supplies.forEach(s => {
+            if (s.cant === 0) return;
 
-    const stmt = db.prepare("INSERT INTO resources (location, name, type, stock_quantity, nomenclature, ip, specifications) VALUES (?, ?, ?, ?, ?, ?, ?)");
-
-    supplies.forEach(s => {
-        if (s.cant === 0) return; // Skip 0 quantity? Or keep as 0? Usually inventory lists existing items. image says 0. keeping 0 might be useful track.
-
-        const loc = s.location || "Depósito";
-        // Store as single record with quantity? 
-        // The current DB schema has `stock_quantity`.
-        // However, previous items (PC, Printers) were 1 row per item (quantity 1).
-        // For 'Insumos', using `stock_quantity` makes more sense to aggregate.
-
-        stmt.run(loc, s.desc, 'Insumo', s.cant, '', '', '{}');
+            const loc = s.location || "Depósito";
+            db.run("INSERT INTO resources (location, name, type, stock_quantity, nomenclature, ip, specifications) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [loc, s.desc, 'Insumo', s.cant, '', '', '{}'], (err) => {
+                    if (err) console.error(`Error agregando insumo ${s.desc}:`, err.message);
+                });
+        });
+        console.log("Stock de Insumos cargado.");
     });
-
-    stmt.finalize();
-    console.log("Stock de Insumos cargado.");
 });
-
-db.close();

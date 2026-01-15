@@ -1,8 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
-const dbPath = path.resolve(__dirname, 'municipal.db');
-const db = new sqlite3.Database(dbPath);
+const db = require('./database');
 
 const printers = [
     { sector: "Coordinación de Gabinete", marca: "HP", modelo: "Laserjet PRO MFP M428fdw", detalle: "" },
@@ -74,25 +70,20 @@ const printers = [
 db.serialize(() => {
     console.log("Cargando inventario de Impresoras...");
 
-    // Clean existing printers? Maybe safely delete only if type='Impresora' to avoid dups if run twice.
-    db.run("DELETE FROM resources WHERE type = 'Impresora'");
+    db.run("DELETE FROM resources WHERE type = 'Impresora'", [], () => {
+        printers.forEach(p => {
+            const name = `${p.marca} ${p.modelo}`;
+            const specs = JSON.stringify({
+                marca: p.marca,
+                modelo: p.modelo,
+                detalles: p.detalle
+            });
 
-    const stmt = db.prepare("INSERT INTO resources (location, name, type, stock_quantity, nomenclature, ip, specifications) VALUES (?, ?, ?, ?, ?, ?, ?)");
-
-    printers.forEach(p => {
-        const name = `${p.marca} ${p.modelo}`;
-        const specs = JSON.stringify({
-            marca: p.marca,
-            modelo: p.modelo,
-            detalles: p.detalle // Using 'detalles' key to match what frontend likely uses for 'Description' or just custom.
+            db.run("INSERT INTO resources (location, name, type, stock_quantity, nomenclature, ip, specifications) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [p.sector, name, 'Impresora', 1, '', '', specs], (err) => {
+                    if (err) console.error(`Error agregando impresora ${name}:`, err.message);
+                });
         });
-
-        // Location mapping (some might need normalization but sticking to image for now)
-        stmt.run(p.sector, name, 'Impresora', 1, '', '', specs);
+        console.log(`Carga de impresoras solicitada.`);
     });
-
-    stmt.finalize();
-    console.log(`Cargadas ${printers.length} impresoras.`);
 });
-
-db.close();

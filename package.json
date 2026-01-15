@@ -4,7 +4,8 @@
   "description": "Sistema de Gestion Municipal",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "seed": "node seed_all.js"
   },
   "dependencies": {
     "express": "^4.18.2",
