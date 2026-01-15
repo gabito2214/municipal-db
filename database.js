@@ -132,6 +132,7 @@ function initDb() {
             name TEXT,
             type TEXT,
             stock_quantity INTEGER DEFAULT 1,
+            unit TEXT,
             nomenclature TEXT,
             ip TEXT,
             specifications TEXT DEFAULT '{}',
