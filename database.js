@@ -147,6 +147,7 @@ function initDb() {
             delivery_date TEXT,
             receiver_name TEXT,
             notes TEXT,
+            attachment_url TEXT,
             created_at ${timestampType}
         )`);
 
