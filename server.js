@@ -341,6 +341,89 @@ app.delete('/api/toners/:id', (req, res) => {
     });
 });
 
+// === SUPPLY DELIVERIES API ===
+
+// GET Deliveries
+app.get('/api/supply-deliveries', (req, res) => {
+    db.all("SELECT * FROM supply_deliveries ORDER BY delivery_date DESC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+// CREATE Delivery (Subtracts from resources stock)
+app.post('/api/supply-deliveries', (req, res) => {
+    const { location, supply_name, delivery_date, receiver_name, notes } = req.body;
+
+    db.serialize(() => {
+        const sql = `INSERT INTO supply_deliveries (location, supply_name, delivery_date, receiver_name, notes) 
+                     VALUES (?, ?, ?, ?, ?)`;
+
+        db.run(sql, [location, supply_name, delivery_date, receiver_name, notes], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            const deliveryId = this.lastID;
+
+            // Decrement Stock in resources
+            const updateStockSql = "UPDATE resources SET stock_quantity = stock_quantity - 1 WHERE name = ? AND type = 'Insumo'";
+            db.run(updateStockSql, [supply_name], function (err) {
+                if (err) console.error("Error updating supply stock:", err.message);
+                res.json({ id: deliveryId, success: true, stock_updated: this.changes > 0 });
+            });
+        });
+    });
+});
+
+// UPDATE Delivery
+app.put('/api/supply-deliveries/:id', (req, res) => {
+    const { id } = req.params;
+    const { location, supply_name, delivery_date, receiver_name, notes } = req.body;
+
+    db.get("SELECT supply_name FROM supply_deliveries WHERE id = ?", [id], (err, oldRecord) => {
+        if (err || !oldRecord) return res.status(404).json({ error: "Record not found" });
+
+        const sql = `UPDATE supply_deliveries SET location = ?, supply_name = ?, delivery_date = ?, receiver_name = ?, notes = ? 
+                     WHERE id = ?`;
+
+        db.run(sql, [location, supply_name, delivery_date, receiver_name, notes, id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            if (oldRecord.supply_name !== supply_name) {
+                // Restore old stock
+                db.run("UPDATE resources SET stock_quantity = stock_quantity + 1 WHERE name = ? AND type = 'Insumo'", [oldRecord.supply_name], () => {
+                    // Subtract new stock
+                    db.run("UPDATE resources SET stock_quantity = stock_quantity - 1 WHERE name = ? AND type = 'Insumo'", [supply_name], () => {
+                        res.json({ success: true });
+                    });
+                });
+            } else {
+                res.json({ success: true });
+            }
+        });
+    });
+});
+
+// DELETE Delivery
+app.delete('/api/supply-deliveries/:id', (req, res) => {
+    const { id } = req.params;
+
+    db.get("SELECT supply_name FROM supply_deliveries WHERE id = ?", [id], (err, row) => {
+        if (err || !row) return res.status(404).json({ error: "Record not found" });
+
+        const supplyName = row.supply_name;
+
+        db.run("DELETE FROM supply_deliveries WHERE id = ?", [id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            // Restore stock
+            db.run("UPDATE resources SET stock_quantity = stock_quantity + 1 WHERE name = ? AND type = 'Insumo'", [supplyName], (err) => {
+                if (err) console.error("Error restoring supply stock:", err.message);
+                res.json({ success: true, deleted: this.changes });
+            });
+        });
+    });
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);

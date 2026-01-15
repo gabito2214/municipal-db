@@ -139,6 +139,17 @@ function initDb() {
             created_at ${timestampType}
         )`);
 
+        // 8. Supply Deliveries
+        db.run(`CREATE TABLE IF NOT EXISTS supply_deliveries (
+            id ${idType},
+            location TEXT,
+            supply_name TEXT,
+            delivery_date TEXT,
+            receiver_name TEXT,
+            notes TEXT,
+            created_at ${timestampType}
+        )`);
+
         // Seed Data
         seedData();
     });
