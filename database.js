@@ -8,6 +8,7 @@ let db;
 
 if (isProduction) {
     console.log('Connecting to PostgreSQL database...');
+    const { Pool } = require('pg');
     const pool = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: {
@@ -18,11 +19,10 @@ if (isProduction) {
     // Wrapper for pg to mimic sqlite3 basic methods used in the app
     db = {
         run: function (sql, params, callback) {
-            // Convert ? to $1, $2, etc.
             let i = 1;
             const pgSql = sql.replace(/\?/g, () => `$${i++}`);
             pool.query(pgSql, params, (err, res) => {
-                if (callback) callback.call({ lastID: res ? res.rows[0]?.id : null, changes: res ? res.rowCount : 0 }, err);
+                if (callback) callback.call({ lastID: res ? (res.rows[0]?.id || null) : null, changes: res ? res.rowCount : 0 }, err);
             });
         },
         get: function (sql, params, callback) {
@@ -40,12 +40,13 @@ if (isProduction) {
             });
         },
         serialize: function (callback) {
-            callback(); // pg doesn't need serialize like sqlite
+            callback();
         }
     };
     initDb();
 } else {
-    // Local SQLite
+    // Local SQLite - Lazy require
+    const sqlite3 = require('sqlite3').verbose();
     const dbPath = path.resolve(__dirname, 'municipal.db');
     const sqliteDb = new sqlite3.Database(dbPath, (err) => {
         if (err) {
