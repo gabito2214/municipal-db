@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node seed_all.js"
+    "seed": "node seed_all.js",
+    "migrate": "node migrate_to_cloud.js"
   },
   "dependencies": {
     "express": "^4.18.2",

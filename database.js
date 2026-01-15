@@ -125,6 +125,19 @@ function initDb() {
             last_updated ${timestampType}
         )`);
 
+        // 7. Resources (Inventory)
+        db.run(`CREATE TABLE IF NOT EXISTS resources (
+            id ${idType},
+            location TEXT,
+            name TEXT,
+            type TEXT,
+            stock_quantity INTEGER DEFAULT 1,
+            nomenclature TEXT,
+            ip TEXT,
+            specifications TEXT DEFAULT '{}',
+            created_at ${timestampType}
+        )`);
+
         // Seed Data
         seedData();
     });
