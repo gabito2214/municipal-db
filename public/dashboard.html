@@ -421,6 +421,7 @@
             <div class="tab" onclick="showSection('impresoras')">🖨️ Inventario Impresoras</div>
             <div class="tab" onclick="showSection('redes')">📡 Redes</div>
             <div class="tab" onclick="showSection('insumos')">🛠️ Stock Insumos</div>
+            <div class="tab" onclick="showSection('supply_deliveries')">🚚 Entregas Insumos</div>
             <div class="tab" onclick="showSection('toners')">📋 Entregas Toners</div>
             <div class="tab" onclick="showSection('toner_stock')">📦 Stock Toners</div>
         </div>
@@ -584,6 +585,33 @@
                     <tr>
                         <th style="min-width: 300px;">Descripción</th>
                         <th>Cantidad</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="section-supply_deliveries" class="content-section">
+            <div class="content-header">
+                <h3>Registro de Entregas de Insumos Generales</h3>
+                <div class="actions-toolbar">
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadSupplyDeliveriesPDF()">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="openSupplyDeliveryModal()" title="Registrar Entrega">
+                        <i data-lucide="truck"></i> Entrega
+                    </button>
+                </div>
+            </div>
+            <table id="supplyDeliveriesTable">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Oficina / Ubicación</th>
+                        <th>Insumo</th>
+                        <th>Recibe</th>
+                        <th>Notas</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -873,7 +901,47 @@
         </div>
     </div>
 
+    <!-- Supply Delivery Modal -->
+    <div id="supplyDeliveryModal" class="modal">
+        <div class="modal-content">
+            <h3 id="supplyDeliveryModalTitle">Registrar Entrega de Insumo</h3>
+            <form id="supplyDeliveryForm" onsubmit="event.preventDefault(); saveSupplyDelivery();">
+                <input type="hidden" id="sdId">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="sdDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Oficina / Ubicación</label>
+                        <input type="text" id="sdLocation" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Insumo (Seleccionar de Inventario)</label>
+                    <input type="text" id="sdSupplyName" list="supplyNamesList" required
+                        placeholder="Escriba el nombre del insumo...">
+                    <small>Este insumo debe existir en la pestaña "🛠️ Stock Insumos".</small>
+                </div>
+                <div class="form-group">
+                    <label>Nombre de quien recibe</label>
+                    <input type="text" id="sdReceiver" required>
+                </div>
+                <div class="form-group">
+                    <label>Notas / Observaciones</label>
+                    <textarea id="sdNotes" style="width: 100%; min-height: 80px;"></textarea>
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeSupplyDeliveryModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <datalist id="tonerModelsList"></datalist>
+    <datalist id="supplyNamesList"></datalist>
 
     <script>
         // Auth Check
@@ -1727,6 +1795,140 @@
         }
         // Initial Icons
         lucide.createIcons();
+
+        // === SUPPLY DELIVERIES LOGIC ===
+        async function loadSupplyDeliveries() {
+            const res = await fetch('/api/supply-deliveries');
+            const deliveries = await res.json();
+            const tbody = document.querySelector('#supplyDeliveriesTable tbody');
+            tbody.innerHTML = '';
+
+            deliveries.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.delivery_date}</td>
+                    <td>${d.location}</td>
+                    <td><b>${d.supply_name}</b></td>
+                    <td>${d.receiver_name}</td>
+                    <td><small>${d.notes || '-'}</small></td>
+                    <td>
+                        <button class="btn btn-primary" onclick='editSupplyDelivery(${JSON.stringify(d)})' style="padding: 4px 8px; font-size: 0.8rem;" title="Editar">
+                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteSupplyDelivery(${d.id})" style="padding: 4px 8px; font-size: 0.8rem;" title="Eliminar">
+                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+
+            // Sync supply models datalist
+            updateSupplyNamesDatalist();
+        }
+
+        async function updateSupplyNamesDatalist() {
+            const res = await fetch('/api/resources');
+            const resources = await res.json();
+            const supplies = resources.filter(r => r.type === 'Insumo');
+            const datalist = document.getElementById('supplyNamesList');
+            if (datalist) {
+                datalist.innerHTML = supplies.map(s => `<option value="${s.name}">`).join('');
+            }
+        }
+
+        function openSupplyDeliveryModal() {
+            document.getElementById('supplyDeliveryForm').reset();
+            document.getElementById('sdId').value = '';
+            document.getElementById('sdDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('supplyDeliveryModal').style.display = 'block';
+        }
+
+        function closeSupplyDeliveryModal() {
+            document.getElementById('supplyDeliveryModal').style.display = 'none';
+        }
+
+        function editSupplyDelivery(d) {
+            document.getElementById('sdId').value = d.id;
+            document.getElementById('sdDate').value = d.delivery_date;
+            document.getElementById('sdLocation').value = d.location;
+            document.getElementById('sdSupplyName').value = d.supply_name;
+            document.getElementById('sdReceiver').value = d.receiver_name;
+            document.getElementById('sdNotes').value = d.notes || '';
+            document.getElementById('supplyDeliveryModal').style.display = 'block';
+        }
+
+        async function saveSupplyDelivery() {
+            const id = document.getElementById('sdId').value;
+            const data = {
+                delivery_date: document.getElementById('sdDate').value,
+                location: document.getElementById('sdLocation').value,
+                supply_name: document.getElementById('sdSupplyName').value,
+                receiver_name: document.getElementById('sdReceiver').value,
+                notes: document.getElementById('sdNotes').value
+            };
+
+            const url = id ? `/api/supply-deliveries/${id}` : '/api/supply-deliveries';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeSupplyDeliveryModal();
+                loadSupplyDeliveries();
+                loadInventory('Insumo', 'suppliesTable'); // Refresh stock table
+            } else {
+                alert('Error al guardar el registro');
+            }
+        }
+
+        async function deleteSupplyDelivery(id) {
+            if (!confirm('¿Seguro que desea eliminar este registro? Se devolverá el stock al insumo.')) return;
+            const res = await fetch(`/api/supply-deliveries/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                loadSupplyDeliveries();
+                loadInventory('Insumo', 'suppliesTable'); // Refresh stock table
+            }
+        }
+
+        async function downloadSupplyDeliveriesPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+
+            const res = await fetch('/api/supply-deliveries');
+            const deliveries = await res.json();
+
+            doc.setFontSize(18);
+            doc.text("Registro de Entrega de Insumos Generales", 14, 20);
+            doc.setFontSize(10);
+            doc.text(`Generado el: ${new Date().toLocaleString()}`, 14, 28);
+
+            const tableData = deliveries.map(d => [
+                d.delivery_date,
+                d.location,
+                d.supply_name,
+                d.receiver_name,
+                d.notes || '-'
+            ]);
+
+            doc.autoTable({
+                head: [['Fecha', 'Oficina', 'Insumo', 'Recibe', 'Notas']],
+                body: tableData,
+                startY: 35,
+                headStyles: { fillColor: [0, 129, 201] },
+                styles: { fontSize: 9 }
+            });
+
+            doc.save(`Entregas_Insumos_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        // Initialize lists
+        loadSupplyDeliveries();
     </script>
 </body>
 
