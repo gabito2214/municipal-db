@@ -611,7 +611,7 @@
                         <th>Oficina / Ubicación</th>
                         <th>Insumo</th>
                         <th>Recibe</th>
-                        <th>Notas</th>
+                        <th>Adjunto</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -926,10 +926,6 @@
                 <div class="form-group">
                     <label>Nombre de quien recibe</label>
                     <input type="text" id="sdReceiver" required>
-                </div>
-                <div class="form-group">
-                    <label>Notas / Observaciones</label>
-                    <textarea id="sdNotes" style="width: 100%; min-height: 80px;"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Adjunto (Documento o Imagen)</label>
@@ -1823,7 +1819,7 @@
                     <td>${d.location}</td>
                     <td><b>${d.supply_name}</b></td>
                     <td>${d.receiver_name}</td>
-                    <td><small>${d.notes || '-'}</small>${attachmentLink}</td>
+                    <td>${attachmentLink || '-'}</td>
                     <td>
                         <button class="btn btn-primary" onclick='editSupplyDelivery(${JSON.stringify(d)})' style="padding: 4px 8px; font-size: 0.8rem;" title="Editar">
                             <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
@@ -1869,7 +1865,6 @@
             document.getElementById('sdLocation').value = d.location;
             document.getElementById('sdSupplyName').value = d.supply_name;
             document.getElementById('sdReceiver').value = d.receiver_name;
-            document.getElementById('sdNotes').value = d.notes || '';
             document.getElementById('sdAttachment').value = '';
             document.getElementById('sdCurrentAttachment').innerText = d.attachment_url ? 'Ya tiene un archivo adjunto' : '';
             document.getElementById('supplyDeliveryModal').style.display = 'block';
@@ -1894,7 +1889,6 @@
                 location: document.getElementById('sdLocation').value,
                 supply_name: document.getElementById('sdSupplyName').value,
                 receiver_name: document.getElementById('sdReceiver').value,
-                notes: document.getElementById('sdNotes').value,
                 attachment: attachment
             };
 
