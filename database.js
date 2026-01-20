@@ -60,21 +60,32 @@ if (isProduction) {
     try {
         sqlite3 = require('sqlite3').verbose();
     } catch (e) {
-        console.error("FAILED to load sqlite3. If this is a production environment, ensure DATABASE_URL is set.");
-        console.error(e);
-        process.exit(1);
-    }
-    const dbPath = path.resolve(__dirname, 'municipal.db');
-    const sqliteDb = new sqlite3.Database(dbPath, (err) => {
-        if (err) {
-            console.error('Error opening database:', err);
-        } else {
-            console.log('Connected to SQLite database.');
-            initDb();
-        }
-    });
+        console.error("CRITICAL: FAILED to load sqlite3 and DATABASE_URL is missing.");
+        console.error("The app will start in 'Maintenance Mode' (No Database).");
+        console.error("Please set DATABASE_URL in Railway Variables.");
+        // process.exit(1); // Don't crash, allow server to verify network
 
-    db = sqliteDb;
+        // Mock DB to prevent immediate crash on listener
+        db = {
+            serialize: (cb) => { if (cb) cb(); },
+            run: (sql, params, cb) => { console.error("DB Not connected: " + sql); if (cb) cb(new Error("DB_NOT_CONNECTED")); },
+            get: (sql, params, cb) => { console.error("DB Not connected"); if (cb) cb(new Error("DB_NOT_CONNECTED")); },
+            all: (sql, params, cb) => { console.error("DB Not connected"); if (cb) cb(new Error("DB_NOT_CONNECTED")); }
+        };
+    }
+
+    if (sqlite3) {
+        const dbPath = path.resolve(__dirname, 'municipal.db');
+        const sqliteDb = new sqlite3.Database(dbPath, (err) => {
+            if (err) {
+                console.error('Error opening database:', err);
+            } else {
+                console.log('Connected to SQLite database.');
+                initDb();
+            }
+        });
+        db = sqliteDb;
+    }
 }
 
 function hashPassword(password) {
