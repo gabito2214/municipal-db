@@ -56,7 +56,14 @@ if (isProduction) {
     initDb();
 } else {
     // Local SQLite - Lazy require
-    const sqlite3 = require('sqlite3').verbose();
+    let sqlite3;
+    try {
+        sqlite3 = require('sqlite3').verbose();
+    } catch (e) {
+        console.error("FAILED to load sqlite3. If this is a production environment, ensure DATABASE_URL is set.");
+        console.error(e);
+        process.exit(1);
+    }
     const dbPath = path.resolve(__dirname, 'municipal.db');
     const sqliteDb = new sqlite3.Database(dbPath, (err) => {
         if (err) {

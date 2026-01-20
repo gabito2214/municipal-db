@@ -11,8 +11,25 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Debug Logging
+console.log("=== SERVER STARTUP ===");
+console.log(`Node Version: ${process.version}`);
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`PORT ENV: ${process.env.PORT}`);
+console.log(`DATABASE_URL Present: ${!!process.env.DATABASE_URL}`);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Global Error Handlers
+process.on('uncaughtException', (err) => {
+    console.error('UNCAUGHT EXCEPTION:', err);
+    // Keep alive for a moment to allow logs to flush if possible, or just log
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('UNHANDLED REJECTION:', reason);
+});
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
