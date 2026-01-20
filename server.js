@@ -18,6 +18,16 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Health Check
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
+// Root fallback
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Helper: Hash Password
 function hashPassword(password) {
     return crypto.createHash('sha256').update(password).digest('hex');
@@ -465,7 +475,10 @@ app.delete('/api/supply-deliveries/:id', (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+// Start Server
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
     console.log(`Usuario: Sistemas | Pass: J.Grillo`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Database URL Present: ${!!process.env.DATABASE_URL}`);
 });
