@@ -20,9 +20,19 @@ if (isProduction) {
     db = {
         run: function (sql, params, callback) {
             let i = 1;
-            const pgSql = sql.replace(/\?/g, () => `$${i++}`);
+            let pgSql = sql.replace(/\?/g, () => `$${i++}`);
+
+            // Auto-append RETURNING id for INSERTs if not present
+            if (pgSql.trim().toUpperCase().startsWith('INSERT') && !pgSql.toUpperCase().includes('RETURNING')) {
+                pgSql += ' RETURNING id';
+            }
+
             pool.query(pgSql, params, (err, res) => {
-                if (callback) callback.call({ lastID: res ? (res.rows[0]?.id || null) : null, changes: res ? res.rowCount : 0 }, err);
+                // Map PostgreSQL result to SQLite-style "this" context
+                const safeLastID = (res && res.rows && res.rows.length > 0) ? res.rows[0].id : null;
+                const safeChanges = res ? res.rowCount : 0;
+
+                if (callback) callback.call({ lastID: safeLastID, changes: safeChanges }, err);
             });
         },
         get: function (sql, params, callback) {

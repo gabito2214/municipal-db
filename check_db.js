@@ -1,12 +1,24 @@
-const db = require('./database');
-setTimeout(() => {
-    db.all("SELECT name FROM sqlite_master WHERE type='table'", (err, rows) => {
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+const dbPath = path.resolve(__dirname, 'municipal.db');
+const db = new sqlite3.Database(dbPath);
+
+const tables = ['roles', 'users', 'projects', 'toners', 'toner_stock', 'resources'];
+
+console.log("=== Conteo de Registros Locales ===");
+
+let completed = 0;
+tables.forEach(table => {
+    db.get(`SELECT count(*) as count FROM ${table}`, (err, row) => {
         if (err) {
-            console.error(err);
+            console.error(`Error en tabla ${table}:`, err.message);
         } else {
-            console.log('Tables in database:');
-            rows.forEach(row => console.log('- ' + row.name));
+            console.log(`${table}: ${row.count} registros`);
         }
-        process.exit(0);
+        completed++;
+        if (completed === tables.length) {
+            db.close();
+        }
     });
-}, 1000);
+});

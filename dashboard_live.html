@@ -1533,8 +1533,7 @@
                 closeTonerModal();
                 loadToners();
             } else {
-                const err = await res.json();
-                alert('Error al guardar el registro: ' + (err.error || 'Error desconocido'));
+                alert('Error al guardar el registro');
             }
         }
 
@@ -1907,8 +1906,7 @@
                 loadSupplyDeliveries();
                 loadInventory('Insumo', 'suppliesTable'); // Refresh stock table
             } else {
-                const err = await res.json();
-                alert('Error al guardar el registro: ' + (err.error || 'Desconocido'));
+                alert('Error al guardar el registro');
             }
         }
 

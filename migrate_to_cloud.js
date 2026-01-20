@@ -16,9 +16,13 @@ async function migrate() {
         ssl: { rejectUnauthorized: false }
     });
 
-    const tables = ['roles', 'users', 'projects', 'toners', 'toner_stock', 'resources'];
+    const tables = ['roles', 'users', 'projects', 'toners', 'toner_stock', 'resources', 'supply_deliveries'];
 
     try {
+        // Ensure schema is updated on cloud
+        console.log("Asegurando esquema en la nube...");
+        await poolCloud.query("ALTER TABLE resources ADD COLUMN IF NOT EXISTS unit TEXT");
+
         for (const table of tables) {
             console.log(`\nMigrando tabla: ${table}...`);
 
@@ -55,6 +59,7 @@ async function migrate() {
         }
 
         console.log("\n=== Migración Finalizada con Éxito ===");
+        console.log("Recuerda que ahora tu aplicación en Render usará estos datos.");
     } catch (err) {
         console.error("\nERROR durante la migración:", err.message);
     } finally {

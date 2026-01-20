@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+*.db
+*.log
+RENDER_GUIDE.md
+render.yaml
+public/uploads/*
+!public/uploads/.gitkeep
