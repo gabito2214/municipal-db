@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+// const sqlite3 = require('sqlite3').verbose(); // Removed top-level require for cloud compatibility
 const { Pool } = require('pg');
 const path = require('path');
 const crypto = require('crypto');
