@@ -1,70 +1,86 @@
 const sqlite3 = require('sqlite3').verbose();
-const { Pool } = require('pg');
+const { Client } = require('pg');
 const path = require('path');
 
 async function migrate() {
-    console.log("=== Iniciando Migración Completa de Datos ===");
-
-    if (!process.env.DATABASE_URL) {
-        console.error("ERROR: Debes configurar la variable DATABASE_URL con tu URL de Railway.");
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+        console.error("ERROR: DATABASE_URL environment variable is missing.");
         process.exit(1);
     }
 
-    const dbLocal = new sqlite3.Database(path.resolve(__dirname, 'municipal.db'));
-    const poolCloud = new Pool({
-        connectionString: process.env.DATABASE_URL,
+    console.log("Connecting to local SQLite...");
+    const sqliteDbPath = path.resolve(__dirname, 'municipal.db');
+    const sqliteDb = new sqlite3.Database(sqliteDbPath);
+
+    console.log("Connecting to production PostgreSQL...");
+    const pgClient = new Client({
+        connectionString: databaseUrl,
         ssl: { rejectUnauthorized: false }
     });
 
-    const tables = ['roles', 'users', 'projects', 'toners', 'toner_stock', 'resources', 'supply_deliveries'];
-
     try {
-        // Ensure schema is updated on cloud
-        console.log("Asegurando esquema en la nube...");
-        await poolCloud.query("ALTER TABLE resources ADD COLUMN IF NOT EXISTS unit TEXT");
+        await pgClient.connect();
+        console.log("Connected successfully to PostgreSQL.");
+
+        const tables = [
+            'roles',
+            'users',
+            'projects',
+            'toners',
+            'toner_stock',
+            'resources',
+            'supply_deliveries'
+        ];
 
         for (const table of tables) {
-            console.log(`\nMigrando tabla: ${table}...`);
+            console.log(`\nMigrating table: ${table}...`);
 
-            // Read local
             const rows = await new Promise((resolve, reject) => {
-                dbLocal.all(`SELECT * FROM ${table}`, (err, rows) => {
+                sqliteDb.all(`SELECT * FROM ${table}`, [], (err, rows) => {
                     if (err) reject(err);
                     else resolve(rows);
                 });
             });
 
-            if (rows.length === 0) {
-                console.log(`  No hay datos en ${table}.`);
-                continue;
-            }
+            console.log(`Found ${rows.length} rows in ${table}.`);
 
-            // Clear remote table (opcional, pero para asegurar limpieza si se reintenta)
-            // CUIDADO: En Postgres, TRUNCATE RESTART IDENTITY es ideal.
-            await poolCloud.query(`TRUNCATE TABLE ${table} RESTART IDENTITY CASCADE`);
+            if (rows.length === 0) continue;
 
-            // Insert into remote
+            // Clear destination table first (Careful: This replaces production data)
+            console.log(`Clearing production table ${table}...`);
+            await pgClient.query(`TRUNCATE TABLE ${table} RESTART IDENTITY CASCADE`);
+
+            const columns = Object.keys(rows[0]);
+            const columnList = columns.join(', ');
+            const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+            const insertSql = `INSERT INTO ${table} (${columnList}) VALUES (${placeholders})`;
+
             for (const row of rows) {
-                const keys = Object.keys(row);
-                const values = Object.values(row);
-
-                // Convert ? to $1, $2 symbols for pg
-                const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-                const columns = keys.join(', ');
-
-                const sql = `INSERT INTO ${table} (${columns}) VALUES (${placeholders})`;
-                await poolCloud.query(sql, values);
+                const values = columns.map(col => {
+                    let val = row[col];
+                    // Handle JSON strings
+                    if (typeof val === 'string' && (val.startsWith('{') || val.startsWith('['))) {
+                        try {
+                            // Check if it's already a JSON string, keep as is
+                            JSON.parse(val);
+                        } catch (e) {
+                            // Not JSON, keep as string
+                        }
+                    }
+                    return val;
+                });
+                await pgClient.query(insertSql, values);
             }
-            console.log(`  ${rows.length} registros migrados exitosamente.`);
+            console.log(`Finished migrating ${table}.`);
         }
 
-        console.log("\n=== Migración Finalizada con Éxito ===");
-        console.log("Recuerda que ahora tu aplicación en Render usará estos datos.");
+        console.log("\n=== Migration Completed Successfully ===");
     } catch (err) {
-        console.error("\nERROR durante la migración:", err.message);
+        console.error("Migration failed:", err);
     } finally {
-        dbLocal.close();
-        await poolCloud.end();
+        sqliteDb.close();
+        await pgClient.end();
     }
 }
 

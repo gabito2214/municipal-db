@@ -45,6 +45,26 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// DIAGNOSTIC ROUTE - For troubleshooting DB connection
+app.get('/api/debug-db', (req, res) => {
+    const isProd = process.env.DATABASE_URL !== undefined;
+    let dbInfo = {
+        type: isProd ? 'PostgreSQL' : 'SQLite',
+        databaseUrlSet: isProd,
+        nodeEnv: process.env.NODE_ENV || 'not set'
+    };
+
+    if (isProd) {
+        try {
+            const url = new URL(process.env.DATABASE_URL);
+            dbInfo.censoredUrl = `${url.protocol}//${url.username}:****@${url.host}${url.pathname}`;
+        } catch (e) {
+            dbInfo.censoredUrl = "INVALID_URL_FORMAT";
+        }
+    }
+    res.json(dbInfo);
+});
+
 // Helper: Hash Password
 function hashPassword(password) {
     return crypto.createHash('sha256').update(password).digest('hex');
@@ -493,8 +513,10 @@ app.delete('/api/supply-deliveries/:id', (req, res) => {
 
 // Start Server
 // Start Server
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
+// Start Server
+const HOST = '0.0.0.0'; // Bind to all interfaces for Cloud/Docker
+app.listen(PORT, HOST, () => {
+    console.log(`Servidor corriendo en http://${HOST}:${PORT}`);
     console.log(`Usuario: Sistemas | Pass: J.Grillo`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Database URL Present: ${!!process.env.DATABASE_URL}`);
