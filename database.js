@@ -3,14 +3,16 @@ const { Pool } = require('pg');
 const path = require('path');
 const crypto = require('crypto');
 
-const isProduction = process.env.DATABASE_URL !== undefined;
+const isProduction = process.env.NODE_ENV === 'production';
 let db;
 
-if (isProduction) {
-    console.log('Connecting to PostgreSQL database...');
-    const { Pool } = require('pg');
+const dbUrl = process.env.DATABASE_URL;
+
+if (dbUrl) {
+    console.log('--- CONEXIÓN CLOUD ---');
+    console.log('Conectando a PostgreSQL (Neon)...');
     const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
+        connectionString: dbUrl,
         ssl: {
             rejectUnauthorized: false
         }
@@ -54,8 +56,21 @@ if (isProduction) {
         }
     };
     initDb();
+} else if (isProduction) {
+    console.error('--- ERROR CRÍTICO ---');
+    console.error('DATABASE_URL no encontrada en el entorno de producción.');
+    console.error('El sistema está en modo mantenimiento.');
+
+    // Mock DB to prevent crash but avoid SQLite fallback in cloud
+    db = {
+        serialize: (cb) => { if (cb) cb(); },
+        run: (sql, params, cb) => { if (cb) cb(new Error("DATABASE_URL_MISSING")); },
+        get: (sql, params, cb) => { if (cb) cb(new Error("DATABASE_URL_MISSING")); },
+        all: (sql, params, cb) => { if (cb) cb(new Error("DATABASE_URL_MISSING")); }
+    };
 } else {
-    // Local SQLite - Lazy require
+    // Local SQLite - Development only
+    console.log('--- CONEXIÓN LOCAL ---');
     let sqlite3;
     try {
         sqlite3 = require('sqlite3').verbose();
@@ -187,6 +202,10 @@ function initDb() {
 function seedData() {
     db.get("SELECT id FROM users WHERE username = ?", ['Sistemas'], (err, row) => {
         if (!row) {
+            if (isProduction) {
+                console.log("Database empty in production. Waiting for manual migration.");
+                return;
+            }
             console.log("Seeding initial data...");
 
             db.run("INSERT INTO roles (name, permissions) VALUES ('Administrador', '{\"all\": true}')", [], () => {
