@@ -13,6 +13,10 @@ db.serialize(() => {
         if (err) console.log("IP column might already exist.");
         else console.log("Added IP column.");
     });
+    db.run("ALTER TABLE resources ADD COLUMN user_name TEXT", (err) => {
+        if (err) console.log("User Name column might already exist.");
+        else console.log("Added User Name column.");
+    });
 });
 
 db.close();

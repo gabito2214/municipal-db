@@ -492,6 +492,7 @@
                         <th>Tipo</th>
                         <th>Descripción Detallada</th>
                         <th>Nomenclatura</th>
+                        <th>Usuario</th>
                         <th>IP</th>
                         <th></th>
                     </tr>
@@ -888,6 +889,11 @@
                     <input type="text" id="rNomenclature">
                 </div>
 
+                <div id="groupUser" class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="rUser" placeholder="Nombre del usuario">
+                </div>
+
                 <div class="form-group">
                     <label>Detalles / Especificaciones</label>
                     <textarea id="rSpecs" style="width: 100%; min-height: 100px;"></textarea>
@@ -1148,6 +1154,7 @@
                         <td><span class="badge">${r.type}</span></td>
                         <td>${specs.detalles || '-'}</td>
                         <td>${r.nomenclature || 'N/A'}</td>
+                        <td>${r.user_name || '-'}</td>
                         <td><code>${r.ip || '-'}</code></td>
                         <td>
                             <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "PC")' style="padding: 4px 8px;" title="Editar">
@@ -1408,10 +1415,10 @@
             let head, body;
 
             if (isPC) {
-                head = [['Oficina', 'Tipo', 'Descripción', 'Nomenclatura', 'IP']];
+                head = [['Oficina', 'Tipo', 'Descripción', 'Nomenclatura', 'Usuario', 'IP']];
                 body = resources.map(r => {
                     const specs = JSON.parse(r.specifications || '{}');
-                    return [r.location, r.type, specs.detalles || '', r.nomenclature || '', r.ip || ''];
+                    return [r.location, r.type, specs.detalles || '', r.nomenclature || '', r.user_name || '', r.ip || ''];
                 });
             } else if (isPrinter) {
                 head = [['Sector', 'Marca/Modelo', 'Detalle', 'IP']];
@@ -1733,6 +1740,7 @@
             document.getElementById('groupIp').style.display = (isPC || isPrinter) ? 'block' : 'none';
             document.getElementById('groupName').style.display = (isPrinter || isNetwork) ? 'block' : 'none';
             document.getElementById('groupNomenclature').style.display = isPC ? 'block' : 'none';
+            document.getElementById('groupUser').style.display = isPC ? 'block' : 'none';
 
             document.getElementById('labelName').innerText = isPrinter ? 'Marca / Modelo' : 'Descripción';
 
@@ -1756,6 +1764,7 @@
             document.getElementById('rIp').value = r.ip || '';
             document.getElementById('rName').value = r.name || '';
             document.getElementById('rNomenclature').value = r.nomenclature || '';
+            document.getElementById('rUser').value = r.user_name || '';
 
             const specs = JSON.parse(r.specifications || '{}');
             document.getElementById('rSpecs').value = specs.detalles || specs.detalle || '';
@@ -1775,6 +1784,7 @@
                 name: document.getElementById('rName').value,
                 nomenclature: document.getElementById('rNomenclature').value,
                 ip: document.getElementById('rIp').value,
+                user_name: document.getElementById('rUser').value,
                 specifications: specs
             };
 

@@ -23,6 +23,11 @@ async function migrate() {
         await pgClient.connect();
         console.log("Connected successfully to PostgreSQL.");
 
+        // Schema sync: Ensure user_name exists in production
+        console.log("Checking production schema...");
+        await pgClient.query("ALTER TABLE resources ADD COLUMN IF NOT EXISTS user_name TEXT");
+        console.log("Production schema updated.");
+
         const tables = [
             'roles',
             'users',
