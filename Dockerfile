@@ -20,5 +20,7 @@ COPY . .
 # Expose a default port (Render will override this via PORT env var)
 EXPOSE 3000
 
+ENV NODE_ENV=production
+
 # Command to start the application
 CMD ["npm", "start"]
