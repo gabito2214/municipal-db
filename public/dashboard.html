@@ -587,7 +587,7 @@
                     <tr>
                         <th style="min-width: 300px;">Descripción</th>
                         <th>Cantidad</th>
-                        <th>Ingreso</th>
+                        <th>Fecha Ingreso</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -869,11 +869,8 @@
                     <input type="number" id="supQty" required>
                 </div>
                 <div class="form-group">
-                    <label>Año de Ingreso</label>
-                    <select id="supYear">
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                    </select>
+                    <label>Fecha de Ingreso</label>
+                    <input type="date" id="supDate" required>
                 </div>
 
                 <div style="text-align: right; margin-top: 20px;">
@@ -1237,7 +1234,7 @@
                     tr.innerHTML = `
                          <td style="min-width: 300px;"><span>${r.name}</span></td>
                          <td><span>${r.stock_quantity || 0}</span></td>
-                         <td><span class="badge">${r.entry_year || '2025'}</span></td>
+                         <td><span class="badge">${r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-'}</span></td>
                          <td>
                             <button class="btn btn-primary" onclick='editSupply(${JSON.stringify(r)})' style="padding: 4px 8px;" title="Editar">
                                 <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
@@ -1493,9 +1490,10 @@
             } else if (isSupply || isBasura) {
                 // Insumos / Basura
                 const isSupplyReport = category === 'Insumo';
-                head = isSupplyReport ? [['Descripción', 'Cantidad', 'Año Ingreso']] : [['Descripción', 'Cantidad']];
+                head = isSupplyReport ? [['Descripción', 'Cantidad', 'Fecha Ingreso']] : [['Descripción', 'Cantidad']];
                 body = resources.map(r => {
-                    return isSupplyReport ? [r.name, r.stock_quantity || 0, r.entry_year || '2025'] : [r.name, r.stock_quantity || 0];
+                    const formattedDate = r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-';
+                    return isSupplyReport ? [r.name, r.stock_quantity || 0, formattedDate] : [r.name, r.stock_quantity || 0];
                 });
             }
 
@@ -1755,7 +1753,7 @@
             document.getElementById('supplyId').value = r.id;
             document.getElementById('supName').value = r.name;
             document.getElementById('supQty').value = r.stock_quantity || 0;
-            document.getElementById('supYear').value = r.entry_year || '2025';
+            document.getElementById('supDate').value = r.entry_date || '';
             document.getElementById('supplyModalTitle').innerText = 'Editar Insumo';
             document.getElementById('supplyModal').style.display = 'block';
         }
@@ -1765,7 +1763,7 @@
             const data = {
                 name: document.getElementById('supName').value,
                 stock_quantity: parseInt(document.getElementById('supQty').value) || 0,
-                entry_year: document.getElementById('supYear').value,
+                entry_date: document.getElementById('supDate').value,
                 type: 'Insumo',
                 location: 'Stock' // Default location for supplies
             };

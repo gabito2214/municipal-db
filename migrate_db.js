@@ -17,11 +17,12 @@ db.serialize(() => {
         if (err) console.log("User Name column might already exist.");
         else console.log("Added User Name column.");
     });
-    db.run("ALTER TABLE resources ADD COLUMN entry_year TEXT", (err) => {
-        if (err) console.log("Entry Year column might already exist.");
+    db.run("ALTER TABLE resources ADD COLUMN entry_date TEXT", (err) => {
+        if (err) console.log("Entry Date column might already exist.");
         else {
-            console.log("Added Entry Year column.");
-            db.run("UPDATE resources SET entry_year = '2025' WHERE entry_year IS NULL");
+            console.log("Added Entry Date column.");
+            // Migrar años existentes a fecha completa (01/01/2025)
+            db.run("UPDATE resources SET entry_date = entry_year || '-01-01' WHERE entry_date IS NULL AND entry_year IS NOT NULL");
         }
     });
 });
