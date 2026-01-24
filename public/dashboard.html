@@ -123,6 +123,14 @@
             font-weight: 500;
             color: var(--text-secondary);
             border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab i {
+            width: 18px;
+            height: 18px;
         }
 
         .tab:hover {
@@ -312,7 +320,7 @@
             }
 
             .tab {
-                display: inline-block;
+                display: inline-flex;
                 padding: 8px 16px;
                 font-size: 0.9rem;
             }
@@ -427,15 +435,16 @@
 
     <div class="container">
         <div class="tabs">
-            <div class="tab active" onclick="showSection('obras')">📂 Expedientes</div>
-            <div class="tab" onclick="showSection('inventario')">📦 Inventario PC</div>
-            <div class="tab" onclick="showSection('impresoras')">🖨️ Inventario Impresoras</div>
-            <div class="tab" onclick="showSection('redes')">📡 Redes</div>
-            <div class="tab" onclick="showSection('insumos')">🛠️ Stock Insumos</div>
-            <div class="tab" onclick="showSection('supply_deliveries')">🚚 Entregas Insumos</div>
-            <div class="tab" onclick="showSection('toners')">📋 Entregas Toners</div>
-            <div class="tab" onclick="showSection('toner_stock')">📦 Stock Toners</div>
-            <div class="tab" onclick="showSection('basura')">♻️ Basura Tecnológica</div>
+            <div class="tab active" onclick="showSection('obras')"><i data-lucide="folder-kanban"></i> Expedientes</div>
+            <div class="tab" onclick="showSection('inventario')"><i data-lucide="monitor-check"></i> Inventario PC</div>
+            <div class="tab" onclick="showSection('impresoras')"><i data-lucide="printer-check"></i> Impresoras</div>
+            <div class="tab" onclick="showSection('redes')"><i data-lucide="network"></i> Redes</div>
+            <div class="tab" onclick="showSection('insumos')"><i data-lucide="component"></i> Stock Insumos</div>
+            <div class="tab" onclick="showSection('supply_deliveries')"><i data-lucide="truck"></i> Entregas Insumos
+            </div>
+            <div class="tab" onclick="showSection('toners')"><i data-lucide="file-output"></i> Entregas Toners</div>
+            <div class="tab" onclick="showSection('toner_stock')"><i data-lucide="boxes"></i> Stock Toners</div>
+            <div class="tab" onclick="showSection('basura')"><i data-lucide="recycle"></i> Basura Tecnológica</div>
         </div>
 
         <section id="section-obras" class="content-section active">
@@ -2053,6 +2062,7 @@
 
         // Initialize lists
         loadSupplyDeliveries();
+        lucide.createIcons();
     </script>
 </body>
 
