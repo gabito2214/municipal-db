@@ -671,6 +671,30 @@
                 <tbody></tbody>
             </table>
         </section>
+
+        <section id="section-basura" class="content-section">
+            <div class="content-header">
+                <h3>Residuos de Aparatos Eléctricos y Electrónicos (Basura Tecnológica)</h3>
+                <div class="actions-toolbar">
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Basura')">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="addResource('Basura')" title="Agregar Residuo">
+                        <i data-lucide="plus-circle"></i> Residuo
+                    </button>
+                </div>
+            </div>
+            <table id="basuraTable">
+                <thead>
+                    <tr>
+                        <th style="min-width: 300px;">Producto / Descripción</th>
+                        <th>Cantidad</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
     </div>
 
     <div id="projectModal" class="modal">
