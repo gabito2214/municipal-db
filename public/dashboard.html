@@ -125,18 +125,22 @@
         }
 
         .tab {
-            padding: 8px 14px;
+            padding: 6px 10px;
             cursor: pointer;
-            border-radius: 10px;
+            border-radius: 12px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
             color: var(--text-secondary);
             border: none;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            font-size: 0.82rem;
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            text-align: center;
+            min-width: 85px;
+            line-height: 1.1;
         }
 
         .tab i {
