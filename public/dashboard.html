@@ -1853,6 +1853,8 @@
             const id = document.getElementById('rId').value;
             const category = document.getElementById('rCategory').value;
 
+            const isPrinter = category === 'Impresora';
+            const isNetwork = category === 'Redes';
             const isBasura = category === 'Basura';
 
             const specs = {};
