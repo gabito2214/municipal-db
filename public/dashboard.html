@@ -107,41 +107,56 @@
 
         .tabs {
             display: flex;
-            gap: 5px;
+            gap: 8px;
             margin-bottom: 30px;
-            background: #E5E7EB;
-            padding: 5px;
-            border-radius: 12px;
-            width: fit-content;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 8px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            width: 100%;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab {
-            padding: 10px 24px;
+            padding: 12px 20px;
             cursor: pointer;
-            border-radius: 9px;
-            transition: all 0.2s ease;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
             color: var(--text-secondary);
             border: none;
             display: flex;
             align-items: center;
             gap: 10px;
+            white-space: nowrap;
         }
 
         .tab i {
             width: 18px;
             height: 18px;
+            opacity: 0.7;
         }
 
         .tab:hover {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 129, 201, 0.08);
             color: var(--primary);
         }
 
         .tab.active {
-            background: var(--bg-card);
-            box-shadow: var(--shadow);
-            color: var(--primary);
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 129, 201, 0.3);
+        }
+
+        .tab.active i {
+            opacity: 1;
         }
 
         table {
@@ -167,21 +182,22 @@
         }
 
         th {
-            background: #F9FAFB;
-            color: var(--text-secondary);
+            background: #F8FAFC;
+            color: #64748B;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.025em;
+            letter-spacing: 0.05em;
+            padding: 12px 16px;
         }
 
         .content-section {
             display: none;
-            background: var(--bg-card);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.02);
         }
 
         .content-section.active {
