@@ -196,12 +196,15 @@ app.post('/api/projects/:id/invoices', (req, res) => {
 // UPDATE Resource (Inventory IT)
 app.put('/api/resources/:id', (req, res) => {
     const { id } = req.params;
-    const { location, type, nomenclature, ip, user_name, specifications } = req.body;
+    const { location, type, nomenclature, ip, user_name, specifications, name, stock_quantity, entry_date } = req.body;
 
-    const sql = "UPDATE resources SET location = ?, type = ?, nomenclature = ?, ip = ?, user_name = ?, specifications = ? WHERE id = ?";
+    // For supplies, name and stock_quantity are critical.
+    // For IT equipment, they might be null/defaults but we should allow updating them if provided.
+
+    const sql = "UPDATE resources SET location = ?, type = ?, nomenclature = ?, ip = ?, user_name = ?, specifications = ?, name = ?, stock_quantity = ?, entry_date = ? WHERE id = ?";
     const specsJSON = typeof specifications === 'string' ? specifications : JSON.stringify(specifications || {});
 
-    db.run(sql, [location, type, nomenclature, ip, user_name, specsJSON, id], function (err) {
+    db.run(sql, [location, type, nomenclature, ip, user_name, specsJSON, name, stock_quantity, entry_date, id], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         if (this.changes === 0) return res.status(404).json({ error: "Resource not found" });
         res.json({ success: true });
@@ -210,12 +213,22 @@ app.put('/api/resources/:id', (req, res) => {
 
 // CREATE Resource (Inventory IT)
 app.post('/api/resources', (req, res) => {
-    const { location, type, nomenclature, ip, user_name, specifications } = req.body;
-    const sql = "INSERT INTO resources (location, type, name, nomenclature, ip, user_name, specifications, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    const { location, type, nomenclature, ip, user_name, specifications, name, stock_quantity, entry_date } = req.body;
+    const sql = "INSERT INTO resources (location, type, name, nomenclature, ip, user_name, specifications, stock_quantity, entry_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     const specsJSON = typeof specifications === 'string' ? specifications : JSON.stringify(specifications || {});
-    const name = `Equipo ${type || 'Nuevo'}`;
+    const finalName = name || `Equipo ${type || 'Nuevo'}`;
 
-    db.run(sql, [location || 'Pendiente', type || 'Nuevo', name, nomenclature || '', ip || '', user_name || '', specsJSON, 1], function (err) {
+    db.run(sql, [
+        location || 'Pendiente',
+        type || 'Nuevo',
+        finalName,
+        nomenclature || '',
+        ip || '',
+        user_name || '',
+        specsJSON,
+        stock_quantity || 1,
+        entry_date || null
+    ], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ id: this.lastID, success: true });
     });
