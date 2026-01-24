@@ -17,6 +17,13 @@ db.serialize(() => {
         if (err) console.log("User Name column might already exist.");
         else console.log("Added User Name column.");
     });
+    db.run("ALTER TABLE resources ADD COLUMN entry_year TEXT", (err) => {
+        if (err) console.log("Entry Year column might already exist.");
+        else {
+            console.log("Added Entry Year column.");
+            db.run("UPDATE resources SET entry_year = '2025' WHERE entry_year IS NULL");
+        }
+    });
 });
 
 db.close();

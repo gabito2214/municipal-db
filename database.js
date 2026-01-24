@@ -179,6 +179,7 @@ function initDb() {
             nomenclature TEXT,
             ip TEXT,
             user_name TEXT,
+            entry_year TEXT,
             specifications TEXT DEFAULT '{}',
             created_at ${timestampType}
         )`);
