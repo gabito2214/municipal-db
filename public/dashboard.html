@@ -1665,6 +1665,7 @@
 
                 stocks.forEach(s => {
                     const tr = document.createElement('tr');
+                    if (s.quantity === 0) tr.classList.add('out-of-stock');
                     const quantityClass = s.quantity <= 2 ? 'style="color: red; font-weight: bold;"' : '';
                     tr.innerHTML = `
                         <td>${s.model}</td>
