@@ -577,7 +577,7 @@
                     <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Insumo')">
                         <i data-lucide="file-text"></i> PDF
                     </button>
-                    <button class="btn btn-primary" onclick="addResource('Insumo')" title="Agregar Insumo">
+                    <button class="btn btn-primary" onclick="openSupplyModal()" title="Agregar Insumo">
                         <i data-lucide="package"></i> Insumo
                     </button>
                 </div>
@@ -1755,6 +1755,7 @@
             document.getElementById('supplyId').value = r.id;
             document.getElementById('supName').value = r.name;
             document.getElementById('supQty').value = r.stock_quantity || 0;
+            document.getElementById('supYear').value = r.entry_year || '2025';
             document.getElementById('supplyModalTitle').innerText = 'Editar Insumo';
             document.getElementById('supplyModal').style.display = 'block';
         }
