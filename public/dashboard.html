@@ -393,6 +393,17 @@
             font-size: 0.85rem;
             color: var(--text-secondary);
         }
+
+        /* Out of Stock Highlighting */
+        .out-of-stock {
+            color: #EF4444 !important;
+            background-color: #FEF2F2 !important;
+        }
+
+        .out-of-stock td {
+            color: #EF4444 !important;
+            font-weight: 600;
+        }
     </style>
     <!-- jsPDF and AutoTable for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1182,6 +1193,11 @@
                 currentResources.push(r);
                 const specs = JSON.parse(r.specifications || '{}');
                 const tr = document.createElement('tr');
+
+                // Highlight Out of Stock
+                if ((isSupply || isBasura) && (r.stock_quantity === 0)) {
+                    tr.classList.add('out-of-stock');
+                }
 
                 if (isPC) {
                     tr.innerHTML = `
