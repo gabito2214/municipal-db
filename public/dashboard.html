@@ -424,6 +424,7 @@
             <div class="tab" onclick="showSection('supply_deliveries')">🚚 Entregas Insumos</div>
             <div class="tab" onclick="showSection('toners')">📋 Entregas Toners</div>
             <div class="tab" onclick="showSection('toner_stock')">📦 Stock Toners</div>
+            <div class="tab" onclick="showSection('basura')">♻️ Basura Tecnológica</div>
         </div>
 
         <section id="section-obras" class="content-section active">
@@ -974,6 +975,7 @@
             if (id === 'insumos') loadInventory('Insumo', 'suppliesTable');
             if (id === 'toners') loadToners();
             if (id === 'toner_stock') loadTonerStock();
+            if (id === 'basura') loadInventory('Basura', 'basuraTable');
         }
 
         // Load Projects
@@ -1104,6 +1106,7 @@
             const isPrinter = typeCategory === 'Impresora';
             const isNetwork = typeCategory === 'Redes';
             const isSupply = typeCategory === 'Insumo';
+            const isBasura = typeCategory === 'Basura';
 
             let filterOfficeId = 'officeFilter';
             if (isPrinter) filterOfficeId = 'officeFilterPrinters';
@@ -1113,7 +1116,7 @@
             const currentFilter = officeSelect ? officeSelect.value : 'all';
 
             // Distinct offices for Filter
-            const offices = resources ? [...new Set(resources.map(r => r.location))].sort() : [];
+            const offices = resources && !isBasura ? [...new Set(resources.map(r => r.location))].sort() : [];
 
             // Only update dropdown if it has 1 element (default) to avoid resetting user selection
             if (officeSelect && (officeSelect.options.length <= 1 || officeSelect.options.length - 1 !== offices.length)) {
@@ -1138,10 +1141,12 @@
                     if (r.type !== 'Redes') return;
                 } else if (isSupply) {
                     if (r.type !== 'Insumo') return;
+                } else if (isBasura) {
+                    if (r.type !== 'Basura') return;
                 }
 
                 // Filter by UI
-                if (!isSupply && officeSelect.value !== 'all' && r.location !== officeSelect.value) return;
+                if (!isSupply && !isBasura && officeSelect.value !== 'all' && r.location !== officeSelect.value) return;
                 if (isPC && document.getElementById('typeFilter').value !== 'all' && r.type !== document.getElementById('typeFilter').value) return;
 
                 currentResources.push(r);
@@ -1208,6 +1213,20 @@
                             </button>
                          </td>
                     `;
+                } else if (isBasura) {
+                    // Basura Tecnológica
+                    tr.innerHTML = `
+                         <td style="min-width: 300px;"><span>${r.name}</span></td>
+                         <td><span>${r.stock_quantity || 0}</span></td>
+                         <td>
+                            <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "Basura")' style="padding: 4px 8px;" title="Editar">
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteResource(${r.id})" style="padding: 4px 8px;" title="Eliminar">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                         </td>
+                    `;
                 }
                 tbody.appendChild(tr);
             });
@@ -1244,11 +1263,14 @@
                     loadInventory('Redes', 'networksTable');
                 } else if (activeTab && activeTab.textContent.includes('Insumos')) {
                     loadInventory('Insumo', 'suppliesTable');
+                } else if (activeTab && activeTab.textContent.includes('Basura')) {
+                    loadInventory('Basura', 'basuraTable');
                 } else {
                     loadInventory('PC', 'inventoryTable'); // Fallback
                     loadInventory('Impresora', 'printersTable'); // Fallback
                     loadInventory('Redes', 'networksTable'); // Fallback
                     loadInventory('Insumo', 'suppliesTable'); // Fallback
+                    loadInventory('Basura', 'basuraTable'); // Fallback
                 }
             } else {
                 alert('Error al eliminar');
@@ -1383,6 +1405,7 @@
             const isPrinter = category === 'Impresora';
             const isNetwork = category === 'Redes';
             const isSupply = category === 'Insumo';
+            const isBasura = category === 'Basura';
 
             let title = "";
             let filterId = 'officeFilter';
@@ -1391,14 +1414,16 @@
             if (isPrinter) { title = "Inventario Impresoras"; filterId = 'officeFilterPrinters'; }
             if (isNetwork) { title = "Inventario Redes"; filterId = 'officeFilterNetworks'; }
             if (isSupply) { title = "Stock Insumos"; filterId = null; }
+            if (isBasura) { title = "Basura Tecnológica (RAEE)"; filterId = null; }
 
             const offFilter = filterId ? document.getElementById(filterId).value : 'all';
 
             // Filter Category
-            if (isPC) resources = resources.filter(r => r.type !== 'Impresora' && r.type !== 'Redes' && r.type !== 'Insumo');
+            if (isPC) resources = resources.filter(r => r.type !== 'Impresora' && r.type !== 'Redes' && r.type !== 'Insumo' && r.type !== 'Basura');
             else if (isPrinter) resources = resources.filter(r => r.type === 'Impresora');
             else if (isNetwork) resources = resources.filter(r => r.type === 'Redes');
             else if (isSupply) resources = resources.filter(r => r.type === 'Insumo');
+            else if (isBasura) resources = resources.filter(r => r.type === 'Basura');
 
             if (offFilter !== 'all') {
                 resources = resources.filter(r => r.location === offFilter);
@@ -1431,12 +1456,10 @@
                 body = resources.map(r => {
                     return [r.location, r.name];
                 });
-            } else if (isSupply) {
-                // Insumos
+            } else if (isSupply || isBasura) {
+                // Insumos / Basura
                 head = [['Descripción', 'Cantidad']];
-                body = resources.map(r => {
-                    return [r.name, r.stock_quantity || 0];
-                });
+                body = resources.map(r => [r.name, r.stock_quantity || 0]);
             }
 
             doc.autoTable({ head, body, startY: 20 });
@@ -1449,6 +1472,7 @@
         loadInventory('Impresora', 'printersTable');
         loadInventory('Redes', 'networksTable');
         loadInventory('Insumo', 'suppliesTable');
+        loadInventory('Basura', 'basuraTable');
         loadToners();
         loadTonerStock();
 
@@ -1735,16 +1759,17 @@
             const isPC = category === 'PC';
             const isPrinter = category === 'Impresora';
             const isNetwork = category === 'Redes';
+            const isBasura = category === 'Basura';
 
             document.getElementById('groupType').style.display = isPC ? 'block' : 'none';
             document.getElementById('groupIp').style.display = (isPC || isPrinter) ? 'block' : 'none';
-            document.getElementById('groupName').style.display = (isPrinter || isNetwork) ? 'block' : 'none';
+            document.getElementById('groupName').style.display = (isPrinter || isNetwork || isBasura) ? 'block' : 'none';
             document.getElementById('groupNomenclature').style.display = isPC ? 'block' : 'none';
             document.getElementById('groupUser').style.display = isPC ? 'block' : 'none';
 
-            document.getElementById('labelName').innerText = isPrinter ? 'Marca / Modelo' : 'Descripción';
+            document.getElementById('labelName').innerText = isPrinter ? 'Marca / Modelo' : (isBasura ? 'Producto / Componente' : 'Descripción');
 
-            document.getElementById('resourceModalTitle').innerText = (editMode ? 'Editar ' : 'Agregar ') + (isPC ? 'Equipo' : (isPrinter ? 'Impresora' : 'Dispositivo'));
+            document.getElementById('resourceModalTitle').innerText = (editMode ? 'Editar ' : 'Agregar ') + (isPC ? 'Equipo' : (isPrinter ? 'Impresora' : (isBasura ? 'Residuo' : 'Dispositivo')));
             document.getElementById('resourceModal').style.display = 'block';
         }
 
@@ -1774,19 +1799,26 @@
             const id = document.getElementById('rId').value;
             const category = document.getElementById('rCategory').value;
 
+            const isBasura = category === 'Basura';
+
             const specs = {};
             if (category === 'PC') specs.detalles = document.getElementById('rSpecs').value;
             else specs.detalle = document.getElementById('rSpecs').value;
 
             const data = {
-                location: document.getElementById('rLocation').value,
-                type: category === 'PC' ? document.getElementById('rType').value : (category === 'Impresora' ? 'Impresora' : 'Redes'),
+                location: isBasura ? 'Depósito RAEE' : document.getElementById('rLocation').value,
+                type: category === 'PC' ? document.getElementById('rType').value : (isPrinter ? 'Impresora' : (isNetwork ? 'Redes' : 'Basura')),
                 name: document.getElementById('rName').value,
                 nomenclature: document.getElementById('rNomenclature').value,
                 ip: document.getElementById('rIp').value,
                 user_name: document.getElementById('rUser').value,
-                specifications: specs
+                specifications: specs,
+                stock_quantity: isBasura || category === 'Insumo' ? prompt("Ingrese la cantidad:", "1") : 1
             };
+
+            // Fix for stock_quantity prompt cancellation
+            if (data.stock_quantity === null) return;
+            data.stock_quantity = parseInt(data.stock_quantity) || 1;
 
             const url = id ? `/api/resources/${id}` : '/api/resources';
             const method = id ? 'PUT' : 'POST';
@@ -1799,7 +1831,8 @@
 
             if (res.ok) {
                 closeResourceModal();
-                loadInventory(category, category === 'PC' ? 'inventoryTable' : (category === 'Impresora' ? 'printersTable' : 'networksTable'));
+                const tableId = category === 'PC' ? 'inventoryTable' : (category === 'Impresora' ? 'printersTable' : (category === 'Redes' ? 'networksTable' : 'basuraTable'));
+                loadInventory(category, tableId);
             } else {
                 const err = await res.json();
                 alert('Error al guardar: ' + (err.error || 'Desconocido'));
