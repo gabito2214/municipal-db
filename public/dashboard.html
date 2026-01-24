@@ -1234,7 +1234,7 @@
                     tr.innerHTML = `
                          <td style="min-width: 300px;"><span>${r.name}</span></td>
                          <td><span>${r.stock_quantity || 0}</span></td>
-                         <td><span class="badge">${r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-'}</span></td>
+                         <td><span class="badge">${r.entry_date === '2025-01-01' ? 'dd/mm/2025' : (r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-')}</span></td>
                          <td>
                             <button class="btn btn-primary" onclick='editSupply(${JSON.stringify(r)})' style="padding: 4px 8px;" title="Editar">
                                 <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
@@ -1492,7 +1492,7 @@
                 const isSupplyReport = category === 'Insumo';
                 head = isSupplyReport ? [['Descripción', 'Cantidad', 'Fecha Ingreso']] : [['Descripción', 'Cantidad']];
                 body = resources.map(r => {
-                    const formattedDate = r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-';
+                    const formattedDate = r.entry_date === '2025-01-01' ? 'dd/mm/2025' : (r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-');
                     return isSupplyReport ? [r.name, r.stock_quantity || 0, formattedDate] : [r.name, r.stock_quantity || 0];
                 });
             }
