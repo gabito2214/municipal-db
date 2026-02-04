@@ -393,6 +393,33 @@
             font-size: 0.85rem;
             color: var(--text-secondary);
         }
+
+        /* Sortable Headers */
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+        }
+
+        th.sortable:hover {
+            background-color: #eee;
+        }
+
+        th.sortable::after {
+            content: '↕';
+            position: absolute;
+            right: 8px;
+            opacity: 0.3;
+        }
+
+        th.sortable.asc::after {
+            content: '↑';
+            opacity: 1;
+        }
+
+        th.sortable.desc::after {
+            content: '↓';
+            opacity: 1;
+        }
     </style>
     <!-- jsPDF and AutoTable for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -441,11 +468,11 @@
             <table id="projectsTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Carátula</th>
-                        <th>Estado</th>
-                        <th>Presupuesto</th>
-                        <th>Número</th>
+                        <th class="sortable" onclick="sortTable(this)">ID</th>
+                        <th class="sortable" onclick="sortTable(this)">Carátula</th>
+                        <th class="sortable" onclick="sortTable(this)">Estado</th>
+                        <th class="sortable" onclick="sortTable(this)">Presupuesto</th>
+                        <th class="sortable" onclick="sortTable(this)">Número</th>
                         <th>Facturas</th>
                         <th></th>
                     </tr>
@@ -488,11 +515,11 @@
             <table id="inventoryTable">
                 <thead>
                     <tr>
-                        <th>Oficina / Ubicación</th>
-                        <th>Tipo</th>
-                        <th>Descripción Detallada</th>
-                        <th>Nomenclatura</th>
-                        <th>IP</th>
+                        <th class="sortable" onclick="sortTable(this)">Oficina / Ubicación</th>
+                        <th class="sortable" onclick="sortTable(this)">Tipo</th>
+                        <th class="sortable" onclick="sortTable(this)">Descripción Detallada</th>
+                        <th class="sortable" onclick="sortTable(this)">Nomenclatura</th>
+                        <th class="sortable" onclick="sortTable(this)">IP</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -524,10 +551,10 @@
             <table id="printersTable">
                 <thead>
                     <tr>
-                        <th>Oficina / Ubicación</th>
-                        <th>Marca / Modelo</th>
-                        <th>Detalle</th>
-                        <th>IP</th>
+                        <th class="sortable" onclick="sortTable(this)">Oficina / Ubicación</th>
+                        <th class="sortable" onclick="sortTable(this)">Marca / Modelo</th>
+                        <th class="sortable" onclick="sortTable(this)">Detalle</th>
+                        <th class="sortable" onclick="sortTable(this)">IP</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -559,8 +586,8 @@
             <table id="networksTable">
                 <thead>
                     <tr>
-                        <th>Oficina / Ubicación</th>
-                        <th>Descripción</th>
+                        <th class="sortable" onclick="sortTable(this)">Oficina / Ubicación</th>
+                        <th class="sortable" onclick="sortTable(this)">Descripción</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -583,8 +610,8 @@
             <table id="suppliesTable">
                 <thead>
                     <tr>
-                        <th style="min-width: 300px;">Descripción</th>
-                        <th>Cantidad</th>
+                        <th class="sortable" onclick="sortTable(this)" style="min-width: 300px;">Descripción</th>
+                        <th class="sortable" onclick="sortTable(this)">Cantidad</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -607,10 +634,10 @@
             <table id="supplyDeliveriesTable">
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Oficina / Ubicación</th>
-                        <th>Insumo</th>
-                        <th>Recibe</th>
+                        <th class="sortable" onclick="sortTable(this)">Fecha</th>
+                        <th class="sortable" onclick="sortTable(this)">Oficina / Ubicación</th>
+                        <th class="sortable" onclick="sortTable(this)">Insumo</th>
+                        <th class="sortable" onclick="sortTable(this)">Recibe</th>
                         <th>Adjunto</th>
                         <th></th>
                     </tr>
@@ -634,12 +661,12 @@
             <table id="tonersTable">
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Recibe (Nombre/DNI)</th>
-                        <th>Cargo/Área</th>
-                        <th>Impresora</th>
-                        <th>Toner (Marca/Mod)</th>
-                        <th>Entrega</th>
+                        <th class="sortable" onclick="sortTable(this)">Fecha</th>
+                        <th class="sortable" onclick="sortTable(this)">Recibe (Nombre/DNI)</th>
+                        <th class="sortable" onclick="sortTable(this)">Cargo/Área</th>
+                        <th class="sortable" onclick="sortTable(this)">Impresora</th>
+                        <th class="sortable" onclick="sortTable(this)">Toner (Marca/Mod)</th>
+                        <th class="sortable" onclick="sortTable(this)">Entrega</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -651,6 +678,9 @@
             <div class="content-header">
                 <h3>Inventario General de Toners (Stock)</h3>
                 <div class="actions-toolbar">
+                    <button class="btn btn-secondary" onclick="downloadTonerStockPDF()" title="Descargar PDF">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
                     <button class="btn btn-primary" onclick="openTonerStockModal()" title="Cargar Stock">
                         <i data-lucide="plus-circle"></i> Stock
                     </button>
@@ -659,10 +689,10 @@
             <table id="tonerStockTable">
                 <thead>
                     <tr>
-                        <th>Modelo de Toner</th>
-                        <th>Cantidad disponible</th>
-                        <th>Descripción / Nota</th>
-                        <th>Última actualización</th>
+                        <th class="sortable" onclick="sortTable(this)">Modelo de Toner</th>
+                        <th class="sortable" onclick="sortTable(this)">Cantidad disponible</th>
+                        <th class="sortable" onclick="sortTable(this)">Descripción / Nota</th>
+                        <th class="sortable" onclick="sortTable(this)">Última actualización</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -671,6 +701,7 @@
         </section>
     </div>
 
+    <!-- Modals omitted for brevity - they remain unchanged -->
     <div id="projectModal" class="modal">
         <div class="modal-content">
             <h3 id="projectModalTitle">Registrar Nuevo Expediente</h3>
@@ -967,6 +998,7 @@
             if (id === 'redes') loadInventory('Redes', 'networksTable');
             if (id === 'insumos') loadInventory('Insumo', 'suppliesTable');
             if (id === 'toners') loadToners();
+            if (id === 'supply_deliveries') loadSupplyDeliveries();
             if (id === 'toner_stock') loadTonerStock();
         }
 
@@ -1088,8 +1120,16 @@
             const res = await fetch('/api/resources');
             let resources = await res.json();
 
-            // Sort by Location alphabetically
-            resources.sort((a, b) => a.location.localeCompare(b.location));
+            // Sort by Location alphabetically (default), or by entry_date for Insumos
+            if (typeCategory === 'Insumo') {
+                resources.sort((a, b) => {
+                    const dateA = a.entry_date ? new Date(a.entry_date).getTime() : 0;
+                    const dateB = b.entry_date ? new Date(b.entry_date).getTime() : 0;
+                    return dateA - dateB; // Ascending
+                });
+            } else {
+                resources.sort((a, b) => a.location.localeCompare(b.location));
+            }
 
             const tbody = document.querySelector(`#${tableId} tbody`);
             tbody.innerHTML = '';
@@ -1192,6 +1232,7 @@
                     tr.innerHTML = `
                          <td style="min-width: 300px;"><span>${r.name}</span></td>
                          <td><span>${r.stock_quantity || 0}</span></td>
+                         <td data-timestamp="${r.entry_date ? new Date(r.entry_date + 'T00:00:00').getTime() : 0}"><span class="badge">${r.entry_date === '2025-01-01' ? 'dd/mm/2025' : (r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-')}</span></td>
                          <td>
                             <button class="btn btn-primary" onclick='editSupply(${JSON.stringify(r)})' style="padding: 4px 8px;" title="Editar">
                                 <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
@@ -1456,7 +1497,7 @@
             toners.forEach(t => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${t.delivery_date}</td>
+                    <td data-timestamp="${new Date(t.delivery_date + 'T00:00:00').getTime()}">${t.delivery_date}</td>
                     <td><b>${t.receiver_name}</b><br><small>DNI: ${t.receiver_dni}</small></td>
                     <td>${t.receiver_position}<br><small>${t.receiver_area}</small></td>
                     <td>${t.printer_brand}</td>
@@ -1587,7 +1628,7 @@
                         <td>${s.model}</td>
                         <td ${quantityClass}>${s.quantity}</td>
                         <td>${s.description || '-'}</td>
-                        <td><small>${new Date(s.last_updated).toLocaleString()}</small></td>
+                        <td data-timestamp="${new Date(s.last_updated).getTime()}"><small>${new Date(s.last_updated).toLocaleString()}</small></td>
                         <td>
                             <button class="btn btn-primary" onclick="prepareEditTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">Editar</button>
                             <button class="btn btn-danger" onclick="deleteTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">X</button>
@@ -1598,6 +1639,148 @@
             } catch (error) {
                 console.error("Error loading toner stock:", error);
             }
+        }
+
+        function prepareEditTonerStock(id) {
+            const s = tonerStocks.find(item => item.id === id);
+            if (!s) return;
+            document.getElementById('stockId').value = s.id;
+            document.getElementById('sModel').value = s.model;
+            document.getElementById('sQuantity').value = s.quantity;
+            document.getElementById('sDescription').value = s.description || '';
+            document.getElementById('tonerStockModalTitle').innerText = 'Editar Stock';
+            document.getElementById('tonerStockModal').style.display = 'block';
+        }
+
+        function openTonerStockModal() {
+            document.getElementById('tonerStockForm').reset();
+            document.getElementById('stockId').value = '';
+            document.getElementById('tonerStockModalTitle').innerText = 'Cargar Stock de Toner';
+            document.getElementById('tonerStockModal').style.display = 'block';
+        }
+
+        function closeTonerStockModal() {
+            document.getElementById('tonerStockModal').style.display = 'none';
+        }
+
+        async function saveTonerStock() {
+            const id = document.getElementById('stockId').value;
+            const data = {
+                model: document.getElementById('sModel').value,
+                quantity: parseInt(document.getElementById('sQuantity').value) || 0,
+                description: document.getElementById('sDescription').value
+            };
+
+            const url = id ? `/api/toner-stock/${id}` : '/api/toner-stock';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeTonerStockModal();
+                loadTonerStock();
+            } else {
+                const err = await res.json();
+                alert('Error al guardar: ' + (err.error || 'Desconocido'));
+            }
+        }
+
+        async function downloadTonerStockPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const res = await fetch('/api/toner-stock');
+            const stocks = await res.json();
+
+            doc.setFontSize(18);
+            doc.text("Inventario General de Toners (Stock)", 14, 20);
+            doc.setFontSize(10);
+            doc.text(`Fecha de reporte: ${new Date().toLocaleString()}`, 14, 28);
+
+            const tableData = stocks.map(s => [
+                s.model,
+                s.quantity,
+                s.description || '-',
+                new Date(s.last_updated).toLocaleString()
+            ]);
+
+            doc.autoTable({
+                head: [['Modelo', 'Cantidad', 'Descripción', 'Última Act.']],
+                body: tableData,
+                startY: 35,
+                headStyles: { fillColor: [0, 129, 201] },
+                styles: { fontSize: 9 }
+            });
+
+            doc.save(`Stock_Toners_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        async function deleteTonerStock(id) {
+            if (!confirm('¿Seguro que desea eliminar este stock?')) return;
+            const res = await fetch(`/api/toner-stock/${id}`, { method: 'DELETE' });
+            if (res.ok) loadTonerStock();
+        }
+
+        // === GENERIC SORTING LOGIC ===
+        function sortTable(th) {
+            const table = th.closest('table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.rows);
+            const headerRow = th.parentElement;
+            const columnIndex = Array.from(headerRow.children).indexOf(th);
+            const isAsc = !th.classList.contains('asc');
+
+            // Reset all headers
+            table.querySelectorAll('th').forEach(t => {
+                t.classList.remove('asc', 'desc');
+            });
+
+            // Set current header
+            th.classList.toggle('asc', isAsc);
+            th.classList.toggle('desc', !isAsc);
+
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.cells[columnIndex];
+                const cellB = rowB.cells[columnIndex];
+
+                let valA = cellA.getAttribute('data-value') || cellA.getAttribute('data-timestamp') || cellA.innerText.trim();
+                let valB = cellB.getAttribute('data-value') || cellB.getAttribute('data-timestamp') || cellB.innerText.trim();
+
+                // Check for numbers (currency or plain)
+                const numA = parseFloat(valA.replace(/[^0-9.-]+/g, ""));
+                const numB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
+
+                // Logic: If looks like number and is not empty/NaN, treat as number.
+                // Exception: IPs (192.168...) parse as 192.168 but we might want string sort or specific IP sort. 
+                // For simplified logic, if both parse fully as numbers, use number.
+
+                const isNum = !isNaN(numA) && !isNaN(numB) && !valA.includes('.') &&
+                    (valA.match(/^[0-9$.,\-\s]+$/) && valB.match(/^[0-9$.,\-\s]+$/));
+
+                if (isNum || (valA.startsWith('$') && valB.startsWith('$'))) {
+                    return isAsc ? numA - numB : numB - numA;
+                }
+
+                // Timestamp/Numeric Data Attributes
+                if (cellA.hasAttribute('data-timestamp') || cellA.hasAttribute('data-value')) {
+                    // Try numeric sort first for these attributes
+                    const tsA = parseFloat(valA);
+                    const tsB = parseFloat(valB);
+                    if (!isNaN(tsA) && !isNaN(tsB)) {
+                        return isAsc ? tsA - tsB : tsB - tsA;
+                    }
+                }
+
+                // Fallback to string
+                return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            });
+
+            // Re-append rows
+            rows.forEach(row => tbody.appendChild(row));
         }
 
         function prepareEditTonerStock(id) {
@@ -1815,7 +1998,7 @@
                     `;
                 }
                 tr.innerHTML = `
-                    <td>${d.delivery_date}</td>
+                    <td data-timestamp="${new Date(d.delivery_date + 'T00:00:00').getTime()}">${d.delivery_date}</td>
                     <td>${d.location}</td>
                     <td><b>${d.supply_name}</b></td>
                     <td>${d.receiver_name}</td>

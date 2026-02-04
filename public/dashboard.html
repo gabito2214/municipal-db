@@ -196,6 +196,34 @@
             padding: 12px 16px;
         }
 
+        /* Sorting Styles */
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th.sortable:hover {
+            background-color: #E2E8F0;
+        }
+
+        th.sortable::after {
+            content: '↕';
+            position: absolute;
+            right: 8px;
+            opacity: 0.3;
+        }
+
+        th.sortable.asc::after {
+            content: '↑';
+            opacity: 1;
+        }
+
+        th.sortable.desc::after {
+            content: '↓';
+            opacity: 1;
+        }
+
         .content-section {
             display: none;
             background: white;
@@ -627,9 +655,9 @@
             <table id="suppliesTable">
                 <thead>
                     <tr>
-                        <th style="min-width: 300px;">Descripción</th>
-                        <th>Cantidad</th>
-                        <th>Fecha Ingreso</th>
+                        <th style="min-width: 300px;" class="sortable" onclick="sortTable(this)">Descripción</th>
+                        <th class="sortable" onclick="sortTable(this)">Cantidad</th>
+                        <th class="sortable" onclick="sortTable(this)">Fecha Ingreso</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -652,10 +680,10 @@
             <table id="supplyDeliveriesTable">
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Oficina / Ubicación</th>
-                        <th>Insumo</th>
-                        <th>Recibe</th>
+                        <th class="sortable" onclick="sortTable(this)">Fecha</th>
+                        <th class="sortable" onclick="sortTable(this)">Oficina / Ubicación</th>
+                        <th class="sortable" onclick="sortTable(this)">Insumo</th>
+                        <th class="sortable" onclick="sortTable(this)">Recibe</th>
                         <th>Adjunto</th>
                         <th></th>
                     </tr>
@@ -679,12 +707,12 @@
             <table id="tonersTable">
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Recibe (Nombre/DNI)</th>
-                        <th>Cargo/Área</th>
-                        <th>Impresora</th>
-                        <th>Toner (Marca/Mod)</th>
-                        <th>Entrega</th>
+                        <th class="sortable" onclick="sortTable(this)">Fecha</th>
+                        <th class="sortable" onclick="sortTable(this)">Recibe (Nombre/DNI)</th>
+                        <th class="sortable" onclick="sortTable(this)">Cargo/Área</th>
+                        <th class="sortable" onclick="sortTable(this)">Impresora</th>
+                        <th class="sortable" onclick="sortTable(this)">Toner (Marca/Mod)</th>
+                        <th class="sortable" onclick="sortTable(this)">Entrega</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -696,6 +724,9 @@
             <div class="content-header">
                 <h3>Inventario General de Toners (Stock)</h3>
                 <div class="actions-toolbar">
+                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadTonerStockPDF()">
+                        <i data-lucide="file-text"></i> PDF
+                    </button>
                     <button class="btn btn-primary" onclick="openTonerStockModal()" title="Cargar Stock">
                         <i data-lucide="plus-circle"></i> Stock
                     </button>
@@ -704,10 +735,10 @@
             <table id="tonerStockTable">
                 <thead>
                     <tr>
-                        <th>Modelo de Toner</th>
-                        <th>Cantidad disponible</th>
-                        <th>Descripción / Nota</th>
-                        <th>Última actualización</th>
+                        <th class="sortable" onclick="sortTable(this)">Modelo de Toner</th>
+                        <th class="sortable" onclick="sortTable(this)">Cantidad disponible</th>
+                        <th class="sortable" onclick="sortTable(this)">Descripción / Nota</th>
+                        <th class="sortable" onclick="sortTable(this)">Última actualización</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -1023,6 +1054,62 @@
     <datalist id="supplyNamesList"></datalist>
 
     <script>
+        // === GENERIC SORTING LOGIC ===
+        function sortTable(th) {
+            const table = th.closest('table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.rows);
+            const headerRow = th.parentElement;
+            const columnIndex = Array.from(headerRow.children).indexOf(th);
+            const isAsc = !th.classList.contains('asc');
+
+            // Reset all headers
+            table.querySelectorAll('th').forEach(t => {
+                t.classList.remove('asc', 'desc');
+            });
+
+            // Set current header
+            th.classList.toggle('asc', isAsc);
+            th.classList.toggle('desc', !isAsc);
+
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.cells[columnIndex];
+                const cellB = rowB.cells[columnIndex];
+
+                let valA = cellA.getAttribute('data-value') || cellA.getAttribute('data-timestamp') || cellA.innerText.trim();
+                let valB = cellB.getAttribute('data-value') || cellB.getAttribute('data-timestamp') || cellB.innerText.trim();
+
+                // Check for numbers (currency or plain)
+                const numA = parseFloat(valA.replace(/[^0-9.-]+/g, ""));
+                const numB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
+
+                // Logic: If looks like number and is not empty/NaN, treat as number.
+                const isNum = !isNaN(numA) && !isNaN(numB) && !valA.includes('.') &&
+                    (valA.match(/^[0-9$.,\-\s]+$/) && valB.match(/^[0-9$.,\-\s]+$/));
+
+                if (isNum || (valA.startsWith('$') && valB.startsWith('$'))) {
+                    return isAsc ? numA - numB : numB - numA;
+                }
+
+                // Timestamp/Numeric Data Attributes
+                if (cellA.hasAttribute('data-timestamp') || cellA.hasAttribute('data-value')) {
+                    // Try numeric sort first for these attributes
+                    const tsA = parseFloat(valA);
+                    const tsB = parseFloat(valB);
+                    if (!isNaN(tsA) && !isNaN(tsB)) {
+                        return isAsc ? tsA - tsB : tsB - tsA;
+                    }
+                }
+
+                // Fallback to string
+                return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            });
+
+            // Re-append rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+    <script>
         // Auth Check
         const user = localStorage.getItem('user');
         if (!user) window.location.href = '/';
@@ -1082,7 +1169,7 @@
                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                         </button>
                     </td>
-                `;
+        `;
                 tbody.appendChild(tr);
             });
             lucide.createIcons();
@@ -1130,7 +1217,7 @@
                 custom: custom
             };
 
-            const url = id ? `/api/projects/${id}` : '/api/projects';
+            const url = id ? `/ api / projects / ${ id } ` : '/api/projects';
             const method = id ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -1151,7 +1238,7 @@
         async function deleteProject(id) {
             if (!confirm('¿Seguro que desea eliminar este expediente?')) return;
 
-            const res = await fetch(`/api/projects/${id}`, {
+            const res = await fetch(`/ api / projects / ${ id } `, {
                 method: 'DELETE'
             });
 
@@ -1168,10 +1255,18 @@
             const res = await fetch('/api/resources');
             let resources = await res.json();
 
-            // Sort by Location alphabetically
-            resources.sort((a, b) => a.location.localeCompare(b.location));
+            // Sort by Location alphabetically (default), or by entry_date for Insumos
+            if (typeCategory === 'Insumo') {
+                resources.sort((a, b) => {
+                    const dateA = a.entry_date ? new Date(a.entry_date).getTime() : 0;
+                    const dateB = b.entry_date ? new Date(b.entry_date).getTime() : 0;
+                    return dateA - dateB; // Ascending
+                });
+            } else {
+                resources.sort((a, b) => a.location.localeCompare(b.location));
+            }
 
-            const tbody = document.querySelector(`#${tableId} tbody`);
+            const tbody = document.querySelector(`#${ tableId } tbody`);
             tbody.innerHTML = '';
 
             const isPC = typeCategory === 'PC';
@@ -1232,7 +1327,7 @@
 
                 if (isPC) {
                     tr.innerHTML = `
-                        <td>${r.location}</td>
+            < td > ${ r.location }</td >
                         <td><span class="badge">${r.type}</span></td>
                         <td>${specs.detalles || '-'}</td>
                         <td>${r.nomenclature || 'N/A'}</td>
@@ -1246,11 +1341,11 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                         </td>
-                    `;
+        `;
                 } else if (isPrinter) {
                     const detalle = specs.detalle || specs.detalles || '-';
                     tr.innerHTML = `
-                        <td>${r.location}</td>
+            < td > ${ r.location }</td >
                         <td>${r.name}</td>
                         <td>${detalle}</td>
                         <td><code>${r.ip || '-'}</code></td>
@@ -1262,10 +1357,10 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                         </td>
-                    `;
+        `;
                 } else if (isNetwork) {
                     tr.innerHTML = `
-                         <td>${r.location}</td>
+            < td > ${ r.location }</td >
                          <td>${r.name}</td>
                          <td>
                             <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "Redes")' style="padding: 4px 8px;" title="Editar">
@@ -1275,13 +1370,13 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                          </td>
-                    `;
+        `;
                 } else if (isSupply) {
                     // Insumos
                     tr.innerHTML = `
-                         <td style="min-width: 300px;"><span>${r.name}</span></td>
+            < td style = "min-width: 300px;" > <span>${r.name}</span></td >
                          <td><span>${r.stock_quantity || 0}</span></td>
-                         <td><span class="badge">${r.entry_date === '2025-01-01' ? 'dd/mm/2025' : (r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-')}</span></td>
+                         <td data-timestamp="${r.entry_date ? new Date(r.entry_date + 'T00:00:00').getTime() : 0}"><span class="badge">${r.entry_date === '2025-01-01' ? 'dd/mm/2025' : (r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-')}</span></td>
                          <td>
                             <button class="btn btn-primary" onclick='editSupply(${JSON.stringify(r)})' style="padding: 4px 8px;" title="Editar">
                                 <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
@@ -1290,11 +1385,11 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                          </td>
-                    `;
+        `;
                 } else if (isBasura) {
                     // Basura Tecnológica
                     tr.innerHTML = `
-                         <td style="min-width: 300px;"><span>${r.name}</span></td>
+            < td style = "min-width: 300px;" > <span>${r.name}</span></td >
                          <td><span>${r.stock_quantity || 0}</span></td>
                          <td>
                             <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "Basura")' style="padding: 4px 8px;" title="Editar">
@@ -1304,7 +1399,7 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                          </td>
-                    `;
+        `;
                 }
                 tbody.appendChild(tr);
             });
@@ -1322,7 +1417,7 @@
         async function deleteResource(id) {
             if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) return;
 
-            const res = await fetch(`/api/resources/${id}`, {
+            const res = await fetch(`/ api / resources / ${ id } `, {
                 method: 'DELETE'
             });
 
@@ -1398,10 +1493,10 @@
 
         function updateGallery() {
             const gallery = document.getElementById('invoiceGallery');
-            document.getElementById('invoiceCount').innerText = `${currentInvoices.length} / 10 imágenes`;
-            gallery.innerHTML = currentInvoices.map(url =>
-                `<a href="${url}" target="_blank"><img src="${url}" class="invoice-thumb" title="Ver imagen completa"></a>`
-            ).join('');
+            document.getElementById('invoiceCount').innerText = `${ currentInvoices.length } / 10 imágenes`;
+        gallery.innerHTML = currentInvoices.map(url =>
+            `<a href="${url}" target="_blank"><img src="${url}" class="invoice-thumb" title="Ver imagen completa"></a>`
+        ).join('');
         }
 
         async function uploadInvoice() {
@@ -1569,7 +1664,7 @@
             toners.forEach(t => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${t.delivery_date}</td>
+                    <td data-timestamp="${new Date(t.delivery_date + 'T00:00:00').getTime()}">${t.delivery_date}</td>
                     <td><b>${t.receiver_name}</b><br><small>DNI: ${t.receiver_dni}</small></td>
                     <td>${t.receiver_position}<br><small>${t.receiver_area}</small></td>
                     <td>${t.printer_brand}</td>
@@ -1678,6 +1773,36 @@
             doc.save(`Entrega_Toners_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
+        async function downloadTonerStockPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const res = await fetch('/api/toner-stock');
+            const stocks = await res.json();
+
+            doc.setFontSize(18);
+            doc.text("Inventario General de Toners (Stock)", 14, 20);
+            doc.setFontSize(10);
+            doc.text(`Fecha de reporte: ${new Date().toLocaleString()}`, 14, 28);
+
+            const tableData = stocks.map(s => [
+                s.model,
+                s.quantity,
+                s.description || '-',
+                new Date(s.last_updated).toLocaleString()
+            ]);
+
+            doc.autoTable({
+                head: [['Modelo', 'Cantidad', 'Descripción', 'Última Act.']],
+                body: tableData,
+                startY: 35,
+                headStyles: { fillColor: [0, 129, 201] },
+                styles: { fontSize: 9 }
+            });
+
+            doc.save(`Stock_Toners_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
         // === TONER STOCK LOGIC ===
         let tonerStocks = [];
 
@@ -1702,7 +1827,7 @@
                         <td>${s.model}</td>
                         <td ${quantityClass}>${s.quantity}</td>
                         <td>${s.description || '-'}</td>
-                        <td><small>${new Date(s.last_updated).toLocaleString()}</small></td>
+                        <td data-timestamp="${new Date(s.last_updated).getTime()}"><small>${new Date(s.last_updated).toLocaleString()}</small></td>
                         <td>
                             <button class="btn btn-primary" onclick="prepareEditTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">Editar</button>
                             <button class="btn btn-danger" onclick="deleteTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">X</button>
@@ -1946,7 +2071,7 @@
                     `;
                 }
                 tr.innerHTML = `
-                    <td>${d.delivery_date}</td>
+                    <td data-timestamp="${new Date(d.delivery_date + 'T00:00:00').getTime()}">${d.delivery_date}</td>
                     <td>${d.location}</td>
                     <td><b>${d.supply_name}</b></td>
                     <td>${d.receiver_name}</td>

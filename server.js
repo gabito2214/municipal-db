@@ -337,14 +337,50 @@ app.put('/api/toner-stock/:id', (req, res) => {
 
     console.log(`Updating toner stock ID ${id}: model="${model}", qty=${quantity}`);
 
-    const sql = "UPDATE toner_stock SET model = ?, quantity = ?, description = ?, last_updated = CURRENT_TIMESTAMP WHERE id = ?";
-    db.run(sql, [model, quantity, description, id], function (err) {
+    // Check if the NEW model name already exists on a DIFFERENT ID
+    db.get("SELECT * FROM toner_stock WHERE model = ? AND id != ?", [model, id], (err, existingRow) => {
         if (err) {
-            console.error("Error updating toner stock:", err.message);
+            console.error("Error checking for duplicate model:", err.message);
             return res.status(500).json({ error: err.message });
         }
-        if (this.changes === 0) return res.status(404).json({ error: "Stock entry not found" });
-        res.json({ success: true });
+
+        if (existingRow) {
+            // MERGE SCENARIO
+            console.log(`MERGE DETECTED: Renaming ID ${id} to existing model "${model}" (ID ${existingRow.id}).`);
+
+            // 1. Update the EXISTING record (add quantity)
+            db.run("UPDATE toner_stock SET quantity = quantity + ?, description = description || ' | ' || ? WHERE id = ?",
+                [quantity, description || '', existingRow.id],
+                (err) => {
+                    if (err) {
+                        console.error("Error merging stock (update target):", err.message);
+                        return res.status(500).json({ error: "Error merging stock: " + err.message });
+                    }
+
+                    // 2. Delete the OLD record (the one being edited)
+                    db.run("DELETE FROM toner_stock WHERE id = ?", [id], (err) => {
+                        if (err) {
+                            console.error("Error merging stock (delete source):", err.message);
+                            return res.status(500).json({ error: "Error merging stock (cleanup): " + err.message });
+                        }
+
+                        console.log("Merge successful.");
+                        res.json({ message: "Stock merged successfully via Smart Merge." });
+                    });
+                });
+
+        } else {
+            // STANDARD UPDATE (No collision)
+            const sql = "UPDATE toner_stock SET model = ?, quantity = ?, description = ?, last_updated = CURRENT_TIMESTAMP WHERE id = ?";
+            db.run(sql, [model, quantity, description, id], function (err) {
+                if (err) {
+                    console.error("Error updating toner stock:", err.message);
+                    return res.status(500).json({ error: err.message });
+                }
+                if (this.changes === 0) return res.status(404).json({ error: "Stock entry not found" });
+                res.json({ success: true });
+            });
+        }
     });
 });
 
