@@ -887,7 +887,12 @@
             <h3 id="resourceModalTitle">Equipo / Dispositivo</h3>
             <form id="resourceForm" onsubmit="event.preventDefault(); saveResource();">
                 <input type="hidden" id="rId">
-                <input type="hidden" id="rCategory">
+                <input type="hidden" id="rTags">
+
+                <div class="form-group">
+                    <label>Fecha de Ingreso</label>
+                    <input type="date" id="rDate" required>
+                </div>
 
                 <div class="form-group">
                     <label>Oficina / Ubicación</label>
@@ -2020,6 +2025,11 @@
             document.getElementById('rId').value = '';
             document.getElementById('rCategory').value = category;
 
+            // Default Date: Today
+            const today = new Date();
+            const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            document.getElementById('rDate').value = localDate;
+
             // Adjust form visibility
             const isPC = category === 'PC';
             const isPrinter = category === 'Impresora';
@@ -2050,6 +2060,7 @@
             document.getElementById('rLocation').value = r.location;
             document.getElementById('rType').value = r.type;
             document.getElementById('rIp').value = r.ip || '';
+            document.getElementById('rDate').value = r.entry_date || '';
             document.getElementById('rName').value = r.name || '';
             document.getElementById('rNomenclature').value = r.nomenclature || '';
 
@@ -2071,6 +2082,7 @@
                 name: document.getElementById('rName').value,
                 nomenclature: document.getElementById('rNomenclature').value,
                 ip: document.getElementById('rIp').value,
+                entry_date: document.getElementById('rDate').value,
                 specifications: specs
             };
 
