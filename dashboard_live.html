@@ -895,9 +895,14 @@
                     <input type="date" id="rDate" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="groupLocation">
                     <label>Oficina / Ubicación</label>
-                    <input type="text" id="rLocation" required>
+                    <input type="text" id="rLocation">
+                </div>
+
+                <div class="form-group" id="groupQty" style="display:none;">
+                    <label>Cantidad</label>
+                    <input type="number" id="rQty" value="1">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -2035,15 +2040,19 @@
             const isPC = category === 'PC';
             const isPrinter = category === 'Impresora';
             const isNetwork = category === 'Redes';
+            const isInsumo = category === 'Insumo';
+
+            document.getElementById('groupLocation').style.display = isInsumo ? 'none' : 'block';
+            document.getElementById('groupQty').style.display = isInsumo ? 'block' : 'none';
 
             document.getElementById('groupType').style.display = isPC ? 'block' : 'none';
             document.getElementById('groupIp').style.display = (isPC || isPrinter) ? 'block' : 'none';
-            document.getElementById('groupName').style.display = (isPrinter || isNetwork) ? 'block' : 'none';
+            document.getElementById('groupName').style.display = (isPrinter || isNetwork || isInsumo) ? 'block' : 'none';
             document.getElementById('groupNomenclature').style.display = isPC ? 'block' : 'none';
 
-            document.getElementById('labelName').innerText = isPrinter ? 'Marca / Modelo' : 'Descripción';
+            document.getElementById('labelName').innerText = isPrinter ? 'Marca / Modelo' : (isInsumo ? 'Descripción del Insumo' : 'Descripción');
 
-            document.getElementById('resourceModalTitle').innerText = (editMode ? 'Editar ' : 'Agregar ') + (isPC ? 'Equipo' : (isPrinter ? 'Impresora' : 'Dispositivo'));
+            document.getElementById('resourceModalTitle').innerText = (editMode ? 'Editar ' : 'Agregar ') + (isPC ? 'Equipo' : (isPrinter ? 'Impresora' : (isInsumo ? 'Insumo' : 'Dispositivo')));
             document.getElementById('resourceModal').style.display = 'block';
         }
 
@@ -2064,6 +2073,7 @@
             document.getElementById('rDate').value = r.entry_date || '';
             document.getElementById('rName').value = r.name || '';
             document.getElementById('rNomenclature').value = r.nomenclature || '';
+            document.getElementById('rQty').value = r.stock_quantity || 1;
 
             const specs = JSON.parse(r.specifications || '{}');
             document.getElementById('rSpecs').value = specs.detalles || specs.detalle || '';
@@ -2078,12 +2088,13 @@
             else specs.detalle = document.getElementById('rSpecs').value;
 
             const data = {
-                location: document.getElementById('rLocation').value,
-                type: category === 'PC' ? document.getElementById('rType').value : (category === 'Impresora' ? 'Impresora' : 'Redes'),
+                location: category === 'Insumo' ? 'Stock' : document.getElementById('rLocation').value,
+                type: category === 'PC' ? document.getElementById('rType').value : category,
                 name: document.getElementById('rName').value,
                 nomenclature: document.getElementById('rNomenclature').value,
                 ip: document.getElementById('rIp').value,
                 entry_date: document.getElementById('rDate').value,
+                stock_quantity: parseInt(document.getElementById('rQty').value) || 1,
                 specifications: specs
             };
 
