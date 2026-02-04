@@ -977,6 +977,22 @@
 
     <script>
         // Auth Check
+        // Global Error Handler
+        window.onerror = function (msg, url, line, col, error) {
+            alert("Error Global: " + msg + "\nLinea: " + line);
+            console.error("Global Error:", error);
+            return false;
+        };
+
+        // Safe Icon Loader
+        function createIcons() {
+            if (window.lucide) {
+                try { lucide.createIcons(); } catch (e) { console.error("Lucide Error:", e); }
+            } else {
+                console.warn("Lucide not loaded - check network or console");
+            }
+        }
+
         const user = localStorage.getItem('user');
         if (!user) window.location.href = '/';
 
@@ -1005,39 +1021,63 @@
         // Load Projects
         // Load Projects
         async function loadProjects() {
-            const res = await fetch('/api/projects');
-            const projects = await res.json();
-            window.allProjects = projects; // Global for editing
-            const tbody = document.querySelector('#projectsTable tbody');
-            tbody.innerHTML = '';
+            console.log("Starting loadProjects...");
+            try {
+                const res = await fetch('/api/projects');
+                console.log("Fetch response status:", res.status);
 
-            projects.forEach(p => {
-                const custom = JSON.parse(p.custom_attributes || '{}');
-                const tr = document.createElement('tr');
+                if (!res.ok) {
+                    throw new Error(`Server returned ${res.status} ${res.statusText}`);
+                }
 
-                tr.innerHTML = `
-                    <td>${p.id}</td>
-                    <td>${p.name}</td>
-                    <td><span class="badge">${p.status}</span></td>
-                    <td>$ ${p.budget || 0}</td>
-                    <td>${custom.Expediente || '-'}</td>
-                    <td>
-                        <button class="btn" onclick="openInvoiceModal(${p.id}, ${JSON.stringify(custom.invoices || []).replaceAll('"', '&quot;')})" style="padding: 4px 8px;" title="Ver Facturas">
-                            <i data-lucide="paperclip" style="width: 14px; height: 14px;"></i> ${(custom.invoices || []).length}
-                        </button>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary" onclick="editProject(${p.id})" style="padding: 4px 8px;" title="Editar">
-                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteProject(${p.id})" style="padding: 4px 8px;" title="Eliminar">
-                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            lucide.createIcons();
+                const projects = await res.json();
+                console.log("Projects loaded:", projects);
+
+                window.allProjects = projects; // Global for editing
+                const tbody = document.querySelector('#projectsTable tbody');
+                if (!tbody) {
+                    console.error("Critical: tbody not found for #projectsTable");
+                    return;
+                }
+                tbody.innerHTML = '';
+
+                if (projects.length === 0) {
+                    console.log("No projects found in response.");
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay expedientes registrados</td></tr>';
+                    return;
+                }
+
+                projects.forEach(p => {
+                    const custom = JSON.parse(p.custom_attributes || '{}');
+                    const tr = document.createElement('tr');
+
+                    tr.innerHTML = `
+                        <td>${p.id}</td>
+                        <td>${p.name}</td>
+                        <td><span class="badge">${p.status}</span></td>
+                        <td>$ ${p.budget || 0}</td>
+                        <td>${custom.Expediente || '-'}</td>
+                        <td>
+                            <button class="btn" onclick="openInvoiceModal(${p.id}, ${JSON.stringify(custom.invoices || []).replaceAll('"', '&quot;')})" style="padding: 4px 8px;" title="Ver Facturas">
+                                <i data-lucide="paperclip" style="width: 14px; height: 14px;"></i> ${(custom.invoices || []).length}
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" onclick="editProject(${p.id})" style="padding: 4px 8px;" title="Editar">
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteProject(${p.id})" style="padding: 4px 8px;" title="Eliminar">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                createIcons();
+            } catch (err) {
+                console.error("Error in loadProjects:", err);
+                alert("Error cargando proyectos. Ver consola para más detalles.");
+            }
         }
 
         function openModal() {
@@ -1247,7 +1287,7 @@
             });
             // Store global for easy access
             window.lastLoadedResources = resources;
-            lucide.createIcons();
+            createIcons();
         }
 
         function addResource(category = 'PC') {
@@ -1978,7 +2018,7 @@
             }
         }
         // Initial Icons
-        lucide.createIcons();
+        createIcons();
 
         // === SUPPLY DELIVERIES LOGIC ===
         async function loadSupplyDeliveries() {
@@ -2014,7 +2054,7 @@
                 `;
                 tbody.appendChild(tr);
             });
-            lucide.createIcons();
+            createIcons();
 
             // Sync supply models datalist
             updateSupplyNamesDatalist();

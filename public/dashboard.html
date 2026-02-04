@@ -107,61 +107,33 @@
 
         .tabs {
             display: flex;
-            gap: 8px;
+            gap: 5px;
             margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 8px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            overflow-x: auto;
-            width: 100%;
-            scrollbar-width: none;
-        }
-
-        .tabs::-webkit-scrollbar {
-            display: none;
+            background: #E5E7EB;
+            padding: 5px;
+            border-radius: 12px;
+            width: fit-content;
         }
 
         .tab {
-            padding: 6px 10px;
+            padding: 10px 24px;
             cursor: pointer;
-            border-radius: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 9px;
+            transition: all 0.2s ease;
             font-weight: 500;
             color: var(--text-secondary);
             border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            font-size: 0.75rem;
-            text-align: center;
-            min-width: 85px;
-            line-height: 1.1;
-        }
-
-        .tab i {
-            width: 16px;
-            height: 16px;
-            opacity: 0.7;
         }
 
         .tab:hover {
-            background: rgba(0, 129, 201, 0.08);
+            background: rgba(255, 255, 255, 0.5);
             color: var(--primary);
         }
 
         .tab.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 129, 201, 0.3);
-        }
-
-        .tab.active i {
-            opacity: 1;
+            background: var(--bg-card);
+            box-shadow: var(--shadow);
+            color: var(--primary);
         }
 
         table {
@@ -187,50 +159,21 @@
         }
 
         th {
-            background: #F8FAFC;
-            color: #64748B;
+            background: #F9FAFB;
+            color: var(--text-secondary);
             font-weight: 600;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 12px 16px;
-        }
-
-        /* Sorting Styles */
-        th.sortable {
-            cursor: pointer;
-            user-select: none;
-            position: relative;
-        }
-
-        th.sortable:hover {
-            background-color: #E2E8F0;
-        }
-
-        th.sortable::after {
-            content: '↕';
-            position: absolute;
-            right: 8px;
-            opacity: 0.3;
-        }
-
-        th.sortable.asc::after {
-            content: '↑';
-            opacity: 1;
-        }
-
-        th.sortable.desc::after {
-            content: '↓';
-            opacity: 1;
+            letter-spacing: 0.025em;
         }
 
         .content-section {
             display: none;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0, 0, 0, 0.02);
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
 
         .content-section.active {
@@ -369,7 +312,7 @@
             }
 
             .tab {
-                display: inline-flex;
+                display: inline-block;
                 padding: 8px 16px;
                 font-size: 0.9rem;
             }
@@ -451,15 +394,31 @@
             color: var(--text-secondary);
         }
 
-        /* Out of Stock Highlighting */
-        .out-of-stock {
-            color: #EF4444 !important;
-            background-color: #FEF2F2 !important;
+        /* Sortable Headers */
+        th.sortable {
+            cursor: pointer;
+            position: relative;
         }
 
-        .out-of-stock td {
-            color: #EF4444 !important;
-            font-weight: 600;
+        th.sortable:hover {
+            background-color: #eee;
+        }
+
+        th.sortable::after {
+            content: '↕';
+            position: absolute;
+            right: 8px;
+            opacity: 0.3;
+        }
+
+        th.sortable.asc::after {
+            content: '↑';
+            opacity: 1;
+        }
+
+        th.sortable.desc::after {
+            content: '↓';
+            opacity: 1;
         }
     </style>
     <!-- jsPDF and AutoTable for PDF Generation -->
@@ -484,17 +443,14 @@
 
     <div class="container">
         <div class="tabs">
-            <div class="tab active" onclick="showSection('obras')"><i data-lucide="folder-kanban"></i> Expedientes</div>
-            <div class="tab" onclick="showSection('inventario')"><i data-lucide="monitor-check"></i> Inventario<br>PC
-            </div>
-            <div class="tab" onclick="showSection('impresoras')"><i data-lucide="printer-check"></i> Impresoras</div>
-            <div class="tab" onclick="showSection('redes')"><i data-lucide="network"></i> Redes</div>
-            <div class="tab" onclick="showSection('insumos')"><i data-lucide="component"></i> Stock<br>Insumos</div>
-            <div class="tab" onclick="showSection('supply_deliveries')"><i data-lucide="truck"></i> Entregas<br>Insumos
-            </div>
-            <div class="tab" onclick="showSection('toners')"><i data-lucide="file-output"></i> Entregas<br>Toners</div>
-            <div class="tab" onclick="showSection('toner_stock')"><i data-lucide="boxes"></i> Stock<br>Toners</div>
-            <div class="tab" onclick="showSection('basura')"><i data-lucide="recycle"></i> Basura<br>Tecnológica</div>
+            <div class="tab active" onclick="showSection('obras')">📂 Expedientes</div>
+            <div class="tab" onclick="showSection('inventario')">📦 Inventario PC</div>
+            <div class="tab" onclick="showSection('impresoras')">🖨️ Inventario Impresoras</div>
+            <div class="tab" onclick="showSection('redes')">📡 Redes</div>
+            <div class="tab" onclick="showSection('insumos')">🛠️ Stock Insumos</div>
+            <div class="tab" onclick="showSection('supply_deliveries')">🚚 Entregas Insumos</div>
+            <div class="tab" onclick="showSection('toners')">📋 Entregas Toners</div>
+            <div class="tab" onclick="showSection('toner_stock')">📦 Stock Toners</div>
         </div>
 
         <section id="section-obras" class="content-section active">
@@ -512,11 +468,11 @@
             <table id="projectsTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Carátula</th>
-                        <th>Estado</th>
-                        <th>Presupuesto</th>
-                        <th>Número</th>
+                        <th class="sortable" onclick="sortTable(this)">ID</th>
+                        <th class="sortable" onclick="sortTable(this)">Carátula</th>
+                        <th class="sortable" onclick="sortTable(this)">Estado</th>
+                        <th class="sortable" onclick="sortTable(this)">Presupuesto</th>
+                        <th class="sortable" onclick="sortTable(this)">Número</th>
                         <th>Facturas</th>
                         <th></th>
                     </tr>
@@ -559,12 +515,11 @@
             <table id="inventoryTable">
                 <thead>
                     <tr>
-                        <th>Oficina / Ubicación</th>
-                        <th>Tipo</th>
-                        <th>Descripción Detallada</th>
-                        <th>Nomenclatura</th>
-                        <th>Usuario</th>
-                        <th>IP</th>
+                        <th class="sortable" onclick="sortTable(this)">Oficina / Ubicación</th>
+                        <th class="sortable" onclick="sortTable(this)">Tipo</th>
+                        <th class="sortable" onclick="sortTable(this)">Descripción Detallada</th>
+                        <th class="sortable" onclick="sortTable(this)">Nomenclatura</th>
+                        <th class="sortable" onclick="sortTable(this)">IP</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -596,10 +551,10 @@
             <table id="printersTable">
                 <thead>
                     <tr>
-                        <th>Oficina / Ubicación</th>
-                        <th>Marca / Modelo</th>
-                        <th>Detalle</th>
-                        <th>IP</th>
+                        <th class="sortable" onclick="sortTable(this)">Oficina / Ubicación</th>
+                        <th class="sortable" onclick="sortTable(this)">Marca / Modelo</th>
+                        <th class="sortable" onclick="sortTable(this)">Detalle</th>
+                        <th class="sortable" onclick="sortTable(this)">IP</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -631,8 +586,8 @@
             <table id="networksTable">
                 <thead>
                     <tr>
-                        <th>Oficina / Ubicación</th>
-                        <th>Descripción</th>
+                        <th class="sortable" onclick="sortTable(this)">Oficina / Ubicación</th>
+                        <th class="sortable" onclick="sortTable(this)">Descripción</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -647,7 +602,7 @@
                     <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Insumo')">
                         <i data-lucide="file-text"></i> PDF
                     </button>
-                    <button class="btn btn-primary" onclick="openSupplyModal()" title="Agregar Insumo">
+                    <button class="btn btn-primary" onclick="addResource('Insumo')" title="Agregar Insumo">
                         <i data-lucide="package"></i> Insumo
                     </button>
                 </div>
@@ -655,9 +610,8 @@
             <table id="suppliesTable">
                 <thead>
                     <tr>
-                        <th style="min-width: 300px;" class="sortable" onclick="sortTable(this)">Descripción</th>
+                        <th class="sortable" onclick="sortTable(this)" style="min-width: 300px;">Descripción</th>
                         <th class="sortable" onclick="sortTable(this)">Cantidad</th>
-                        <th class="sortable" onclick="sortTable(this)">Fecha Ingreso</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -724,7 +678,7 @@
             <div class="content-header">
                 <h3>Inventario General de Toners (Stock)</h3>
                 <div class="actions-toolbar">
-                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadTonerStockPDF()">
+                    <button class="btn btn-secondary" onclick="downloadTonerStockPDF()" title="Descargar PDF">
                         <i data-lucide="file-text"></i> PDF
                     </button>
                     <button class="btn btn-primary" onclick="openTonerStockModal()" title="Cargar Stock">
@@ -745,32 +699,9 @@
                 <tbody></tbody>
             </table>
         </section>
-
-        <section id="section-basura" class="content-section">
-            <div class="content-header">
-                <h3>Residuos de Aparatos Eléctricos y Electrónicos (Basura Tecnológica)</h3>
-                <div class="actions-toolbar">
-                    <button class="btn btn-secondary" title="Descargar PDF" onclick="downloadInventoryPDF('Basura')">
-                        <i data-lucide="file-text"></i> PDF
-                    </button>
-                    <button class="btn btn-primary" onclick="addResource('Basura')" title="Agregar Residuo">
-                        <i data-lucide="plus-circle"></i> Residuo
-                    </button>
-                </div>
-            </div>
-            <table id="basuraTable">
-                <thead>
-                    <tr>
-                        <th style="min-width: 300px;">Producto / Descripción</th>
-                        <th>Cantidad</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </section>
     </div>
 
+    <!-- Modals omitted for brevity - they remain unchanged -->
     <div id="projectModal" class="modal">
         <div class="modal-content">
             <h3 id="projectModalTitle">Registrar Nuevo Expediente</h3>
@@ -941,10 +872,6 @@
                     <label>Cantidad</label>
                     <input type="number" id="supQty" required>
                 </div>
-                <div class="form-group">
-                    <label>Fecha de Ingreso</label>
-                    <input type="date" id="supDate" required>
-                </div>
 
                 <div style="text-align: right; margin-top: 20px;">
                     <button type="button" class="btn" onclick="closeSupplyModal()">Cancelar</button>
@@ -990,11 +917,6 @@
                 <div id="groupNomenclature" class="form-group">
                     <label>Nomenclatura</label>
                     <input type="text" id="rNomenclature">
-                </div>
-
-                <div id="groupUser" class="form-group">
-                    <label>Usuario</label>
-                    <input type="text" id="rUser" placeholder="Nombre del usuario">
                 </div>
 
                 <div class="form-group">
@@ -1054,63 +976,23 @@
     <datalist id="supplyNamesList"></datalist>
 
     <script>
-        // === GENERIC SORTING LOGIC ===
-        function sortTable(th) {
-            const table = th.closest('table');
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.rows);
-            const headerRow = th.parentElement;
-            const columnIndex = Array.from(headerRow.children).indexOf(th);
-            const isAsc = !th.classList.contains('asc');
+        // Auth Check
+        // Global Error Handler
+        window.onerror = function (msg, url, line, col, error) {
+            alert("Error Global: " + msg + "\nLinea: " + line);
+            console.error("Global Error:", error);
+            return false;
+        };
 
-            // Reset all headers
-            table.querySelectorAll('th').forEach(t => {
-                t.classList.remove('asc', 'desc');
-            });
-
-            // Set current header
-            th.classList.toggle('asc', isAsc);
-            th.classList.toggle('desc', !isAsc);
-
-            rows.sort((rowA, rowB) => {
-                const cellA = rowA.cells[columnIndex];
-                const cellB = rowB.cells[columnIndex];
-
-                let valA = cellA.getAttribute('data-value') || cellA.getAttribute('data-timestamp') || cellA.innerText.trim();
-                let valB = cellB.getAttribute('data-value') || cellB.getAttribute('data-timestamp') || cellB.innerText.trim();
-
-                // Check for numbers (currency or plain)
-                const numA = parseFloat(valA.replace(/[^0-9.-]+/g, ""));
-                const numB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
-
-                // Logic: If looks like number and is not empty/NaN, treat as number.
-                const isNum = !isNaN(numA) && !isNaN(numB) && !valA.includes('.') &&
-                    (valA.match(/^[0-9$.,\-\s]+$/) && valB.match(/^[0-9$.,\-\s]+$/));
-
-                if (isNum || (valA.startsWith('$') && valB.startsWith('$'))) {
-                    return isAsc ? numA - numB : numB - numA;
-                }
-
-                // Timestamp/Numeric Data Attributes
-                if (cellA.hasAttribute('data-timestamp') || cellA.hasAttribute('data-value')) {
-                    // Try numeric sort first for these attributes
-                    const tsA = parseFloat(valA);
-                    const tsB = parseFloat(valB);
-                    if (!isNaN(tsA) && !isNaN(tsB)) {
-                        return isAsc ? tsA - tsB : tsB - tsA;
-                    }
-                }
-
-                // Fallback to string
-                return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-            });
-
-            // Re-append rows
-            rows.forEach(row => tbody.appendChild(row));
+        // Safe Icon Loader
+        function createIcons() {
+            if (window.lucide) {
+                try { lucide.createIcons(); } catch (e) { console.error("Lucide Error:", e); }
+            } else {
+                console.warn("Lucide not loaded - check network or console");
+            }
         }
 
-    <script>
-        // Auth Check
         const user = localStorage.getItem('user');
         if (!user) window.location.href = '/';
 
@@ -1132,47 +1014,70 @@
             if (id === 'redes') loadInventory('Redes', 'networksTable');
             if (id === 'insumos') loadInventory('Insumo', 'suppliesTable');
             if (id === 'toners') loadToners();
-            if (id === 'toner_stock') loadTonerStock();
-            if (id === 'basura') loadInventory('Basura', 'basuraTable');
             if (id === 'supply_deliveries') loadSupplyDeliveries();
+            if (id === 'toner_stock') loadTonerStock();
         }
 
         // Load Projects
         // Load Projects
         async function loadProjects() {
-            const res = await fetch('/api/projects');
-            const projects = await res.json();
-            window.allProjects = projects; // Global for editing
-            const tbody = document.querySelector('#projectsTable tbody');
-            tbody.innerHTML = '';
+            console.log("Starting loadProjects...");
+            try {
+                const res = await fetch('/api/projects');
+                console.log("Fetch response status:", res.status);
 
-            projects.forEach(p => {
-                const custom = JSON.parse(p.custom_attributes || '{}');
-                const tr = document.createElement('tr');
+                if (!res.ok) {
+                    throw new Error(`Server returned ${res.status} ${res.statusText}`);
+                }
 
-                tr.innerHTML = `
-                    <td>${p.id}</td>
-                    <td>${p.name}</td>
-                    <td><span class="badge">${p.status}</span></td>
-                    <td>$ ${p.budget || 0}</td>
-                    <td>${custom.Expediente || '-'}</td>
-                    <td>
-                        <button class="btn" onclick="openInvoiceModal(${p.id}, ${JSON.stringify(custom.invoices || []).replaceAll('"', '&quot;')})" style="padding: 4px 8px;" title="Ver Facturas">
-                            <i data-lucide="paperclip" style="width: 14px; height: 14px;"></i> ${(custom.invoices || []).length}
-                        </button>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary" onclick="editProject(${p.id})" style="padding: 4px 8px;" title="Editar">
-                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteProject(${p.id})" style="padding: 4px 8px;" title="Eliminar">
-                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                        </button>
-                    </td>
-        `;
-                tbody.appendChild(tr);
-            });
-            lucide.createIcons();
+                const projects = await res.json();
+                console.log("Projects loaded:", projects);
+
+                window.allProjects = projects; // Global for editing
+                const tbody = document.querySelector('#projectsTable tbody');
+                if (!tbody) {
+                    console.error("Critical: tbody not found for #projectsTable");
+                    return;
+                }
+                tbody.innerHTML = '';
+
+                if (projects.length === 0) {
+                    console.log("No projects found in response.");
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay expedientes registrados</td></tr>';
+                    return;
+                }
+
+                projects.forEach(p => {
+                    const custom = JSON.parse(p.custom_attributes || '{}');
+                    const tr = document.createElement('tr');
+
+                    tr.innerHTML = `
+                        <td>${p.id}</td>
+                        <td>${p.name}</td>
+                        <td><span class="badge">${p.status}</span></td>
+                        <td>$ ${p.budget || 0}</td>
+                        <td>${custom.Expediente || '-'}</td>
+                        <td>
+                            <button class="btn" onclick="openInvoiceModal(${p.id}, ${JSON.stringify(custom.invoices || []).replaceAll('"', '&quot;')})" style="padding: 4px 8px;" title="Ver Facturas">
+                                <i data-lucide="paperclip" style="width: 14px; height: 14px;"></i> ${(custom.invoices || []).length}
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" onclick="editProject(${p.id})" style="padding: 4px 8px;" title="Editar">
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteProject(${p.id})" style="padding: 4px 8px;" title="Eliminar">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                createIcons();
+            } catch (err) {
+                console.error("Error in loadProjects:", err);
+                alert("Error cargando proyectos. Ver consola para más detalles.");
+            }
         }
 
         function openModal() {
@@ -1217,7 +1122,7 @@
                 custom: custom
             };
 
-            const url = id ? `/ api / projects / ${ id } ` : '/api/projects';
+            const url = id ? `/api/projects/${id}` : '/api/projects';
             const method = id ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -1238,7 +1143,7 @@
         async function deleteProject(id) {
             if (!confirm('¿Seguro que desea eliminar este expediente?')) return;
 
-            const res = await fetch(`/ api / projects / ${ id } `, {
+            const res = await fetch(`/api/projects/${id}`, {
                 method: 'DELETE'
             });
 
@@ -1266,14 +1171,13 @@
                 resources.sort((a, b) => a.location.localeCompare(b.location));
             }
 
-            const tbody = document.querySelector(`#${ tableId } tbody`);
+            const tbody = document.querySelector(`#${tableId} tbody`);
             tbody.innerHTML = '';
 
             const isPC = typeCategory === 'PC';
             const isPrinter = typeCategory === 'Impresora';
             const isNetwork = typeCategory === 'Redes';
             const isSupply = typeCategory === 'Insumo';
-            const isBasura = typeCategory === 'Basura';
 
             let filterOfficeId = 'officeFilter';
             if (isPrinter) filterOfficeId = 'officeFilterPrinters';
@@ -1283,7 +1187,7 @@
             const currentFilter = officeSelect ? officeSelect.value : 'all';
 
             // Distinct offices for Filter
-            const offices = resources && !isBasura ? [...new Set(resources.map(r => r.location))].sort() : [];
+            const offices = resources ? [...new Set(resources.map(r => r.location))].sort() : [];
 
             // Only update dropdown if it has 1 element (default) to avoid resetting user selection
             if (officeSelect && (officeSelect.options.length <= 1 || officeSelect.options.length - 1 !== offices.length)) {
@@ -1308,30 +1212,22 @@
                     if (r.type !== 'Redes') return;
                 } else if (isSupply) {
                     if (r.type !== 'Insumo') return;
-                } else if (isBasura) {
-                    if (r.type !== 'Basura') return;
                 }
 
                 // Filter by UI
-                if (!isSupply && !isBasura && officeSelect.value !== 'all' && r.location !== officeSelect.value) return;
+                if (!isSupply && officeSelect.value !== 'all' && r.location !== officeSelect.value) return;
                 if (isPC && document.getElementById('typeFilter').value !== 'all' && r.type !== document.getElementById('typeFilter').value) return;
 
                 currentResources.push(r);
                 const specs = JSON.parse(r.specifications || '{}');
                 const tr = document.createElement('tr');
 
-                // Highlight Out of Stock
-                if ((isSupply || isBasura) && (r.stock_quantity === 0)) {
-                    tr.classList.add('out-of-stock');
-                }
-
                 if (isPC) {
                     tr.innerHTML = `
-            < td > ${ r.location }</td >
+                        <td>${r.location}</td>
                         <td><span class="badge">${r.type}</span></td>
                         <td>${specs.detalles || '-'}</td>
                         <td>${r.nomenclature || 'N/A'}</td>
-                        <td>${r.user_name || '-'}</td>
                         <td><code>${r.ip || '-'}</code></td>
                         <td>
                             <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "PC")' style="padding: 4px 8px;" title="Editar">
@@ -1341,11 +1237,11 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                         </td>
-        `;
+                    `;
                 } else if (isPrinter) {
                     const detalle = specs.detalle || specs.detalles || '-';
                     tr.innerHTML = `
-            < td > ${ r.location }</td >
+                        <td>${r.location}</td>
                         <td>${r.name}</td>
                         <td>${detalle}</td>
                         <td><code>${r.ip || '-'}</code></td>
@@ -1357,10 +1253,10 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                         </td>
-        `;
+                    `;
                 } else if (isNetwork) {
                     tr.innerHTML = `
-            < td > ${ r.location }</td >
+                         <td>${r.location}</td>
                          <td>${r.name}</td>
                          <td>
                             <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "Redes")' style="padding: 4px 8px;" title="Editar">
@@ -1370,11 +1266,11 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                          </td>
-        `;
+                    `;
                 } else if (isSupply) {
                     // Insumos
                     tr.innerHTML = `
-            < td style = "min-width: 300px;" > <span>${r.name}</span></td >
+                         <td style="min-width: 300px;"><span>${r.name}</span></td>
                          <td><span>${r.stock_quantity || 0}</span></td>
                          <td data-timestamp="${r.entry_date ? new Date(r.entry_date + 'T00:00:00').getTime() : 0}"><span class="badge">${r.entry_date === '2025-01-01' ? 'dd/mm/2025' : (r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-')}</span></td>
                          <td>
@@ -1385,27 +1281,13 @@
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                          </td>
-        `;
-                } else if (isBasura) {
-                    // Basura Tecnológica
-                    tr.innerHTML = `
-            < td style = "min-width: 300px;" > <span>${r.name}</span></td >
-                         <td><span>${r.stock_quantity || 0}</span></td>
-                         <td>
-                            <button class="btn btn-primary" onclick='prepareEditResource(${r.id}, "Basura")' style="padding: 4px 8px;" title="Editar">
-                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
-                            </button>
-                            <button class="btn btn-danger" onclick="deleteResource(${r.id})" style="padding: 4px 8px;" title="Eliminar">
-                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                            </button>
-                         </td>
-        `;
+                    `;
                 }
                 tbody.appendChild(tr);
             });
             // Store global for easy access
             window.lastLoadedResources = resources;
-            lucide.createIcons();
+            createIcons();
         }
 
         function addResource(category = 'PC') {
@@ -1417,7 +1299,7 @@
         async function deleteResource(id) {
             if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) return;
 
-            const res = await fetch(`/ api / resources / ${ id } `, {
+            const res = await fetch(`/api/resources/${id}`, {
                 method: 'DELETE'
             });
 
@@ -1436,14 +1318,11 @@
                     loadInventory('Redes', 'networksTable');
                 } else if (activeTab && activeTab.textContent.includes('Insumos')) {
                     loadInventory('Insumo', 'suppliesTable');
-                } else if (activeTab && activeTab.textContent.includes('Basura')) {
-                    loadInventory('Basura', 'basuraTable');
                 } else {
                     loadInventory('PC', 'inventoryTable'); // Fallback
                     loadInventory('Impresora', 'printersTable'); // Fallback
                     loadInventory('Redes', 'networksTable'); // Fallback
                     loadInventory('Insumo', 'suppliesTable'); // Fallback
-                    loadInventory('Basura', 'basuraTable'); // Fallback
                 }
             } else {
                 alert('Error al eliminar');
@@ -1493,10 +1372,10 @@
 
         function updateGallery() {
             const gallery = document.getElementById('invoiceGallery');
-            document.getElementById('invoiceCount').innerText = `${ currentInvoices.length } / 10 imágenes`;
-        gallery.innerHTML = currentInvoices.map(url =>
-            `<a href="${url}" target="_blank"><img src="${url}" class="invoice-thumb" title="Ver imagen completa"></a>`
-        ).join('');
+            document.getElementById('invoiceCount').innerText = `${currentInvoices.length} / 10 imágenes`;
+            gallery.innerHTML = currentInvoices.map(url =>
+                `<a href="${url}" target="_blank"><img src="${url}" class="invoice-thumb" title="Ver imagen completa"></a>`
+            ).join('');
         }
 
         async function uploadInvoice() {
@@ -1578,7 +1457,6 @@
             const isPrinter = category === 'Impresora';
             const isNetwork = category === 'Redes';
             const isSupply = category === 'Insumo';
-            const isBasura = category === 'Basura';
 
             let title = "";
             let filterId = 'officeFilter';
@@ -1587,16 +1465,14 @@
             if (isPrinter) { title = "Inventario Impresoras"; filterId = 'officeFilterPrinters'; }
             if (isNetwork) { title = "Inventario Redes"; filterId = 'officeFilterNetworks'; }
             if (isSupply) { title = "Stock Insumos"; filterId = null; }
-            if (isBasura) { title = "Basura Tecnológica (RAEE)"; filterId = null; }
 
             const offFilter = filterId ? document.getElementById(filterId).value : 'all';
 
             // Filter Category
-            if (isPC) resources = resources.filter(r => r.type !== 'Impresora' && r.type !== 'Redes' && r.type !== 'Insumo' && r.type !== 'Basura');
+            if (isPC) resources = resources.filter(r => r.type !== 'Impresora' && r.type !== 'Redes' && r.type !== 'Insumo');
             else if (isPrinter) resources = resources.filter(r => r.type === 'Impresora');
             else if (isNetwork) resources = resources.filter(r => r.type === 'Redes');
             else if (isSupply) resources = resources.filter(r => r.type === 'Insumo');
-            else if (isBasura) resources = resources.filter(r => r.type === 'Basura');
 
             if (offFilter !== 'all') {
                 resources = resources.filter(r => r.location === offFilter);
@@ -1613,10 +1489,10 @@
             let head, body;
 
             if (isPC) {
-                head = [['Oficina', 'Tipo', 'Descripción', 'Nomenclatura', 'Usuario', 'IP']];
+                head = [['Oficina', 'Tipo', 'Descripción', 'Nomenclatura', 'IP']];
                 body = resources.map(r => {
                     const specs = JSON.parse(r.specifications || '{}');
-                    return [r.location, r.type, specs.detalles || '', r.nomenclature || '', r.user_name || '', r.ip || ''];
+                    return [r.location, r.type, specs.detalles || '', r.nomenclature || '', r.ip || ''];
                 });
             } else if (isPrinter) {
                 head = [['Sector', 'Marca/Modelo', 'Detalle', 'IP']];
@@ -1629,13 +1505,11 @@
                 body = resources.map(r => {
                     return [r.location, r.name];
                 });
-            } else if (isSupply || isBasura) {
-                // Insumos / Basura
-                const isSupplyReport = category === 'Insumo';
-                head = isSupplyReport ? [['Descripción', 'Cantidad', 'Fecha Ingreso']] : [['Descripción', 'Cantidad']];
+            } else if (isSupply) {
+                // Insumos
+                head = [['Descripción', 'Cantidad']];
                 body = resources.map(r => {
-                    const formattedDate = r.entry_date === '2025-01-01' ? 'dd/mm/2025' : (r.entry_date ? r.entry_date.split('-').reverse().join('/') : '-');
-                    return isSupplyReport ? [r.name, r.stock_quantity || 0, formattedDate] : [r.name, r.stock_quantity || 0];
+                    return [r.name, r.stock_quantity || 0];
                 });
             }
 
@@ -1649,7 +1523,6 @@
         loadInventory('Impresora', 'printersTable');
         loadInventory('Redes', 'networksTable');
         loadInventory('Insumo', 'suppliesTable');
-        loadInventory('Basura', 'basuraTable');
         loadToners();
         loadTonerStock();
 
@@ -1741,8 +1614,7 @@
                 closeTonerModal();
                 loadToners();
             } else {
-                const err = await res.json();
-                alert('Error al guardar el registro: ' + (err.error || 'Error desconocido'));
+                alert('Error al guardar el registro');
             }
         }
 
@@ -1771,6 +1643,90 @@
             });
 
             doc.save(`Entrega_Toners_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        // === TONER STOCK LOGIC ===
+        let tonerStocks = [];
+
+        async function loadTonerStock() {
+            try {
+                const res = await fetch('/api/toner-stock');
+                const stocks = await res.json();
+                tonerStocks = stocks;
+
+                // Keep datalist in sync
+                const datalist = document.getElementById('tonerModelsList');
+                if (datalist) datalist.innerHTML = stocks.map(s => `<option value="${s.model}">`).join('');
+
+                const tbody = document.querySelector('#tonerStockTable tbody');
+                tbody.innerHTML = '';
+
+                stocks.forEach(s => {
+                    const tr = document.createElement('tr');
+                    const quantityClass = s.quantity <= 2 ? 'style="color: red; font-weight: bold;"' : '';
+                    tr.innerHTML = `
+                        <td>${s.model}</td>
+                        <td ${quantityClass}>${s.quantity}</td>
+                        <td>${s.description || '-'}</td>
+                        <td data-timestamp="${new Date(s.last_updated).getTime()}"><small>${new Date(s.last_updated).toLocaleString()}</small></td>
+                        <td>
+                            <button class="btn btn-primary" onclick="prepareEditTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">Editar</button>
+                            <button class="btn btn-danger" onclick="deleteTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">X</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error loading toner stock:", error);
+            }
+        }
+
+        function prepareEditTonerStock(id) {
+            const s = tonerStocks.find(item => item.id === id);
+            if (!s) return;
+            document.getElementById('stockId').value = s.id;
+            document.getElementById('sModel').value = s.model;
+            document.getElementById('sQuantity').value = s.quantity;
+            document.getElementById('sDescription').value = s.description || '';
+            document.getElementById('tonerStockModalTitle').innerText = 'Editar Stock';
+            document.getElementById('tonerStockModal').style.display = 'block';
+        }
+
+        function openTonerStockModal() {
+            document.getElementById('tonerStockForm').reset();
+            document.getElementById('stockId').value = '';
+            document.getElementById('tonerStockModalTitle').innerText = 'Cargar Stock de Toner';
+            document.getElementById('tonerStockModal').style.display = 'block';
+        }
+
+        function closeTonerStockModal() {
+            document.getElementById('tonerStockModal').style.display = 'none';
+        }
+
+        async function saveTonerStock() {
+            const id = document.getElementById('stockId').value;
+            const data = {
+                model: document.getElementById('sModel').value,
+                quantity: parseInt(document.getElementById('sQuantity').value) || 0,
+                description: document.getElementById('sDescription').value
+            };
+
+            const url = id ? `/api/toner-stock/${id}` : '/api/toner-stock';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                closeTonerStockModal();
+                loadTonerStock();
+            } else {
+                const err = await res.json();
+                alert('Error al guardar: ' + (err.error || 'Desconocido'));
+            }
         }
 
         async function downloadTonerStockPDF() {
@@ -1803,41 +1759,68 @@
             doc.save(`Stock_Toners_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
-        // === TONER STOCK LOGIC ===
-        let tonerStocks = [];
+        async function deleteTonerStock(id) {
+            if (!confirm('¿Seguro que desea eliminar este stock?')) return;
+            const res = await fetch(`/api/toner-stock/${id}`, { method: 'DELETE' });
+            if (res.ok) loadTonerStock();
+        }
 
-        async function loadTonerStock() {
-            try {
-                const res = await fetch('/api/toner-stock');
-                const stocks = await res.json();
-                tonerStocks = stocks;
+        // === GENERIC SORTING LOGIC ===
+        function sortTable(th) {
+            const table = th.closest('table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.rows);
+            const headerRow = th.parentElement;
+            const columnIndex = Array.from(headerRow.children).indexOf(th);
+            const isAsc = !th.classList.contains('asc');
 
-                // Keep datalist in sync
-                const datalist = document.getElementById('tonerModelsList');
-                if (datalist) datalist.innerHTML = stocks.map(s => `<option value="${s.model}">`).join('');
+            // Reset all headers
+            table.querySelectorAll('th').forEach(t => {
+                t.classList.remove('asc', 'desc');
+            });
 
-                const tbody = document.querySelector('#tonerStockTable tbody');
-                tbody.innerHTML = '';
+            // Set current header
+            th.classList.toggle('asc', isAsc);
+            th.classList.toggle('desc', !isAsc);
 
-                stocks.forEach(s => {
-                    const tr = document.createElement('tr');
-                    if (s.quantity === 0) tr.classList.add('out-of-stock');
-                    const quantityClass = s.quantity <= 2 ? 'style="color: red; font-weight: bold;"' : '';
-                    tr.innerHTML = `
-                        <td>${s.model}</td>
-                        <td ${quantityClass}>${s.quantity}</td>
-                        <td>${s.description || '-'}</td>
-                        <td data-timestamp="${new Date(s.last_updated).getTime()}"><small>${new Date(s.last_updated).toLocaleString()}</small></td>
-                        <td>
-                            <button class="btn btn-primary" onclick="prepareEditTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">Editar</button>
-                            <button class="btn btn-danger" onclick="deleteTonerStock(${s.id})" style="padding: 4px 8px; font-size: 0.8rem;">X</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                console.error("Error loading toner stock:", error);
-            }
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.cells[columnIndex];
+                const cellB = rowB.cells[columnIndex];
+
+                let valA = cellA.getAttribute('data-value') || cellA.getAttribute('data-timestamp') || cellA.innerText.trim();
+                let valB = cellB.getAttribute('data-value') || cellB.getAttribute('data-timestamp') || cellB.innerText.trim();
+
+                // Check for numbers (currency or plain)
+                const numA = parseFloat(valA.replace(/[^0-9.-]+/g, ""));
+                const numB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
+
+                // Logic: If looks like number and is not empty/NaN, treat as number.
+                // Exception: IPs (192.168...) parse as 192.168 but we might want string sort or specific IP sort. 
+                // For simplified logic, if both parse fully as numbers, use number.
+
+                const isNum = !isNaN(numA) && !isNaN(numB) && !valA.includes('.') &&
+                    (valA.match(/^[0-9$.,\-\s]+$/) && valB.match(/^[0-9$.,\-\s]+$/));
+
+                if (isNum || (valA.startsWith('$') && valB.startsWith('$'))) {
+                    return isAsc ? numA - numB : numB - numA;
+                }
+
+                // Timestamp/Numeric Data Attributes
+                if (cellA.hasAttribute('data-timestamp') || cellA.hasAttribute('data-value')) {
+                    // Try numeric sort first for these attributes
+                    const tsA = parseFloat(valA);
+                    const tsB = parseFloat(valB);
+                    if (!isNaN(tsA) && !isNaN(tsB)) {
+                        return isAsc ? tsA - tsB : tsB - tsA;
+                    }
+                }
+
+                // Fallback to string
+                return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            });
+
+            // Re-append rows
+            rows.forEach(row => tbody.appendChild(row));
         }
 
         function prepareEditTonerStock(id) {
@@ -1926,7 +1909,6 @@
             document.getElementById('supplyId').value = r.id;
             document.getElementById('supName').value = r.name;
             document.getElementById('supQty').value = r.stock_quantity || 0;
-            document.getElementById('supDate').value = r.entry_date || '';
             document.getElementById('supplyModalTitle').innerText = 'Editar Insumo';
             document.getElementById('supplyModal').style.display = 'block';
         }
@@ -1936,7 +1918,6 @@
             const data = {
                 name: document.getElementById('supName').value,
                 stock_quantity: parseInt(document.getElementById('supQty').value) || 0,
-                entry_date: document.getElementById('supDate').value,
                 type: 'Insumo',
                 location: 'Stock' // Default location for supplies
             };
@@ -1969,17 +1950,15 @@
             const isPC = category === 'PC';
             const isPrinter = category === 'Impresora';
             const isNetwork = category === 'Redes';
-            const isBasura = category === 'Basura';
 
             document.getElementById('groupType').style.display = isPC ? 'block' : 'none';
             document.getElementById('groupIp').style.display = (isPC || isPrinter) ? 'block' : 'none';
-            document.getElementById('groupName').style.display = (isPrinter || isNetwork || isBasura) ? 'block' : 'none';
+            document.getElementById('groupName').style.display = (isPrinter || isNetwork) ? 'block' : 'none';
             document.getElementById('groupNomenclature').style.display = isPC ? 'block' : 'none';
-            document.getElementById('groupUser').style.display = isPC ? 'block' : 'none';
 
-            document.getElementById('labelName').innerText = isPrinter ? 'Marca / Modelo' : (isBasura ? 'Producto / Componente' : 'Descripción');
+            document.getElementById('labelName').innerText = isPrinter ? 'Marca / Modelo' : 'Descripción';
 
-            document.getElementById('resourceModalTitle').innerText = (editMode ? 'Editar ' : 'Agregar ') + (isPC ? 'Equipo' : (isPrinter ? 'Impresora' : (isBasura ? 'Residuo' : 'Dispositivo')));
+            document.getElementById('resourceModalTitle').innerText = (editMode ? 'Editar ' : 'Agregar ') + (isPC ? 'Equipo' : (isPrinter ? 'Impresora' : 'Dispositivo'));
             document.getElementById('resourceModal').style.display = 'block';
         }
 
@@ -1999,7 +1978,6 @@
             document.getElementById('rIp').value = r.ip || '';
             document.getElementById('rName').value = r.name || '';
             document.getElementById('rNomenclature').value = r.nomenclature || '';
-            document.getElementById('rUser').value = r.user_name || '';
 
             const specs = JSON.parse(r.specifications || '{}');
             document.getElementById('rSpecs').value = specs.detalles || specs.detalle || '';
@@ -2009,28 +1987,18 @@
             const id = document.getElementById('rId').value;
             const category = document.getElementById('rCategory').value;
 
-            const isPrinter = category === 'Impresora';
-            const isNetwork = category === 'Redes';
-            const isBasura = category === 'Basura';
-
             const specs = {};
             if (category === 'PC') specs.detalles = document.getElementById('rSpecs').value;
             else specs.detalle = document.getElementById('rSpecs').value;
 
             const data = {
-                location: isBasura ? 'Depósito RAEE' : document.getElementById('rLocation').value,
-                type: category === 'PC' ? document.getElementById('rType').value : (isPrinter ? 'Impresora' : (isNetwork ? 'Redes' : 'Basura')),
+                location: document.getElementById('rLocation').value,
+                type: category === 'PC' ? document.getElementById('rType').value : (category === 'Impresora' ? 'Impresora' : 'Redes'),
                 name: document.getElementById('rName').value,
                 nomenclature: document.getElementById('rNomenclature').value,
                 ip: document.getElementById('rIp').value,
-                user_name: document.getElementById('rUser').value,
-                specifications: specs,
-                stock_quantity: isBasura || category === 'Insumo' ? prompt("Ingrese la cantidad:", "1") : 1
+                specifications: specs
             };
-
-            // Fix for stock_quantity prompt cancellation
-            if (data.stock_quantity === null) return;
-            data.stock_quantity = parseInt(data.stock_quantity) || 1;
 
             const url = id ? `/api/resources/${id}` : '/api/resources';
             const method = id ? 'PUT' : 'POST';
@@ -2043,15 +2011,14 @@
 
             if (res.ok) {
                 closeResourceModal();
-                const tableId = category === 'PC' ? 'inventoryTable' : (category === 'Impresora' ? 'printersTable' : (category === 'Redes' ? 'networksTable' : 'basuraTable'));
-                loadInventory(category, tableId);
+                loadInventory(category, category === 'PC' ? 'inventoryTable' : (category === 'Impresora' ? 'printersTable' : 'networksTable'));
             } else {
                 const err = await res.json();
                 alert('Error al guardar: ' + (err.error || 'Desconocido'));
             }
         }
         // Initial Icons
-        lucide.createIcons();
+        createIcons();
 
         // === SUPPLY DELIVERIES LOGIC ===
         async function loadSupplyDeliveries() {
@@ -2087,7 +2054,7 @@
                 `;
                 tbody.appendChild(tr);
             });
-            lucide.createIcons();
+            createIcons();
 
             // Sync supply models datalist
             updateSupplyNamesDatalist();
@@ -2162,8 +2129,7 @@
                 loadSupplyDeliveries();
                 loadInventory('Insumo', 'suppliesTable'); // Refresh stock table
             } else {
-                const err = await res.json();
-                alert('Error al guardar el registro: ' + (err.error || 'Desconocido'));
+                alert('Error al guardar el registro');
             }
         }
 
@@ -2209,7 +2175,6 @@
 
         // Initialize lists
         loadSupplyDeliveries();
-        lucide.createIcons();
     </script>
 </body>
 
