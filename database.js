@@ -21,6 +21,12 @@ if (dbUrl) {
     // Wrapper for pg to mimic sqlite3 basic methods used in the app
     db = {
         run: function (sql, params, callback) {
+            if (typeof params === 'function') {
+                callback = params;
+                params = [];
+            }
+            if (!params) params = [];
+
             let i = 1;
             let pgSql = sql.replace(/\?/g, () => `$${i++}`);
 
@@ -38,6 +44,12 @@ if (dbUrl) {
             });
         },
         get: function (sql, params, callback) {
+            if (typeof params === 'function') {
+                callback = params;
+                params = [];
+            }
+            if (!params) params = [];
+
             let i = 1;
             const pgSql = sql.replace(/\?/g, () => `$${i++}`);
             pool.query(pgSql, params, (err, res) => {
@@ -45,6 +57,12 @@ if (dbUrl) {
             });
         },
         all: function (sql, params, callback) {
+            if (typeof params === 'function') {
+                callback = params;
+                params = [];
+            }
+            if (!params) params = [];
+
             let i = 1;
             const pgSql = sql.replace(/\?/g, () => `$${i++}`);
             pool.query(pgSql, params, (err, res) => {
