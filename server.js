@@ -153,6 +153,46 @@ app.delete('/api/projects/:id', (req, res) => {
     });
 });
 
+// DELETE Project File
+app.delete('/api/projects/:id/files', (req, res) => {
+    const { id } = req.params;
+    const { filename } = req.body; // Expects full relative path e.g. "/uploads/invoice_123.jpg"
+
+    if (!filename) return res.status(400).json({ error: "Filename required" });
+
+    db.get("SELECT custom_attributes FROM projects WHERE id = ?", [id], (err, row) => {
+        if (err || !row) return res.status(404).json({ error: "Project not found" });
+
+        let custom = JSON.parse(row.custom_attributes || '{}');
+        if (!custom.invoices || !Array.isArray(custom.invoices)) {
+            return res.status(404).json({ error: "No files found" });
+        }
+
+        const originalLength = custom.invoices.length;
+        custom.invoices = custom.invoices.filter(f => f !== filename);
+
+        if (custom.invoices.length === originalLength) {
+            return res.status(404).json({ error: "File not found in project" });
+        }
+
+        // Remove from disk
+        const filePath = path.join(__dirname, 'public', filename);
+        if (fs.existsSync(filePath)) {
+            try {
+                fs.unlinkSync(filePath);
+            } catch (unlinkErr) {
+                console.error("Error deleting file from disk:", unlinkErr);
+            }
+        }
+
+        // Update DB
+        db.run("UPDATE projects SET custom_attributes = ? WHERE id = ?", [JSON.stringify(custom), id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true, message: "File deleted" });
+        });
+    });
+});
+
 // UPLOAD Invoice
 app.post('/api/projects/:id/invoices', (req, res) => {
     const { id } = req.params;

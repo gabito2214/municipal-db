@@ -1415,9 +1415,41 @@
         function updateGallery() {
             const gallery = document.getElementById('invoiceGallery');
             document.getElementById('invoiceCount').innerText = `${currentInvoices.length} / 10 imágenes`;
-            gallery.innerHTML = currentInvoices.map(url =>
-                `<a href="${url}" target="_blank"><img src="${url}" class="invoice-thumb" title="Ver imagen completa"></a>`
+            gallery.innerHTML = currentInvoices.map((url, index) =>
+                `<div class="gallery-item" style="display:inline-block; position:relative; margin:5px;">
+                    <a href="${url}" target="_blank"><img src="${url}" class="invoice-thumb" title="Ver imagen completa" style="max-height:100px;"></a>
+                    <button onclick="deleteInvoice('${url}')" style="position:absolute; top:0; right:0; background:red; color:white; border:none; cursor:pointer;" title="Eliminar">&times;</button>
+                </div>`
             ).join('');
+        }
+
+        async function deleteInvoice(url) {
+            if (!confirm("¿Eliminar esta imagen?")) return;
+            if (!currentProjectId) return;
+
+            // Remove beginning relative path for API matching if needed, or send as is strictly matching DB value
+            // DB stores "/uploads/..." usually.
+
+            try {
+                const res = await fetch(`/api/projects/${currentProjectId}/files`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: url })
+                });
+
+                if (res.ok) {
+                    currentInvoices = currentInvoices.filter(u => u !== url);
+                    updateGallery();
+                    // Optional: Reload projects to sync "View" button state if needed, but not strictly required for gallery view
+                    // loadProjects(); 
+                } else {
+                    const data = await res.json();
+                    alert("Error eliminando: " + (data.error || "Desconocido"));
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error de conexión");
+            }
         }
 
         async function uploadInvoice() {
