@@ -1156,9 +1156,51 @@
         }
 
         // Load Inventory
+        function normalizeLocation(name) {
+            if (!name) return 'Sin Asignar';
+            let norm = name.trim().replace(/\s+/g, ' '); // Remove extra spaces
+
+            // Fix specific typos/accents case-insensitive
+            const replacements = {
+                'Accion': 'Acción',
+                'Acesoria': 'Asesoría',
+                'Deliverante': 'Deliberante',
+                'Contaduria': 'Contaduría',
+                'Coordinacion': 'Coordinación',
+                'Tecnica': 'Técnica',
+                'Administracion': 'Administración',
+                'Publicas': 'Públicas',
+                'Tesoreria': 'Tesorería',
+                'Union': 'Unión',
+                'Produccion': 'Producción',
+                'Despues': 'Después',
+                'Secretaria': 'Secretaría'
+            };
+
+            Object.keys(replacements).forEach(key => {
+                const regex = new RegExp(key, 'gi');
+                norm = norm.replace(regex, replacements[key]);
+            });
+
+            // Specific phrases that might need fixing after general replace
+            norm = norm.replace(/Secretaría De/gi, 'Secretaría de');
+            norm = norm.replace(/Y/gi, 'y'); // Lowercase 'y' connector if strict title case wanted, but Title Case is usually fine.
+
+            // Force Title Case
+            return norm.replace(/\b\w/g, l => l.toUpperCase()).replace(/\bDe\b/g, 'de').replace(/\bY\b/g, 'y');
+        }
+
         async function loadInventory(typeCategory = 'PC', tableId = 'inventoryTable') {
             const res = await fetch('/api/resources');
             let resources = await res.json();
+
+            // NORMALIZE LOCATIONS
+            if (resources && resources.length) {
+                resources.forEach(r => {
+                    r.originalLocation = r.location; // Keep original just in case
+                    r.location = normalizeLocation(r.location);
+                });
+            }
 
             // Sort by Location alphabetically (default), or by entry_date for Insumos
             if (typeCategory === 'Insumo') {
