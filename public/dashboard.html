@@ -890,10 +890,6 @@
                 <input type="hidden" id="rTags">
                 <input type="hidden" id="rCategory">
 
-                <div class="form-group">
-                    <label>Fecha de Ingreso</label>
-                    <input type="date" id="rDate" required>
-                </div>
 
                 <div class="form-group" id="groupLocation">
                     <label>Oficina / Ubicación</label>
@@ -1428,7 +1424,10 @@
             document.getElementById('invoiceCount').innerText = `${currentInvoices.length} / 10 imágenes`;
             gallery.innerHTML = currentInvoices.map((url, index) =>
                 `<div class="gallery-item" style="display:inline-block; position:relative; margin:5px;">
-                    <a href="${url}" target="_blank"><img src="${url}" class="invoice-thumb" title="Ver imagen completa" style="max-height:100px;"></a>
+                    <a href="${url}" target="_blank">
+                        <img src="${url}" class="invoice-thumb" title="Ver imagen completa" style="max-height:100px;" 
+                        onerror="this.onerror=null; this.src='https://placehold.co/100x100?text=No+Encontrado'; this.parentElement.removeAttribute('href'); this.parentElement.style.pointerEvents='none';">
+                    </a>
                     <button onclick="deleteInvoice('${url}')" style="position:absolute; top:0; right:0; background:red; color:white; border:none; cursor:pointer;" title="Eliminar">&times;</button>
                 </div>`
             ).join('');
@@ -2031,10 +2030,6 @@
             document.getElementById('rId').value = '';
             document.getElementById('rCategory').value = category;
 
-            // Default Date: Today
-            const today = new Date();
-            const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-            document.getElementById('rDate').value = localDate;
 
             // Adjust form visibility
             const isPC = category === 'PC';
@@ -2070,7 +2065,6 @@
             document.getElementById('rLocation').value = r.location;
             document.getElementById('rType').value = r.type;
             document.getElementById('rIp').value = r.ip || '';
-            document.getElementById('rDate').value = r.entry_date || '';
             document.getElementById('rName').value = r.name || '';
             document.getElementById('rNomenclature').value = r.nomenclature || '';
             document.getElementById('rQty').value = r.stock_quantity || 1;
@@ -2093,7 +2087,6 @@
                 name: document.getElementById('rName').value,
                 nomenclature: document.getElementById('rNomenclature').value,
                 ip: document.getElementById('rIp').value,
-                entry_date: document.getElementById('rDate').value,
                 stock_quantity: parseInt(document.getElementById('rQty').value) || 1,
                 specifications: specs
             };
